@@ -1,6 +1,7 @@
 import React from 'react';
 import {render} from 'react-dom';
 import BK_Menu from './components/menu.jsx'
+import BK_Identity from './components/identity.jsx'
 
 class BitKariero extends React.Component {
   constructor() {
@@ -12,7 +13,9 @@ class BitKariero extends React.Component {
         {key: 'approval-queue', label: 'Approval queue', icon: 'hourglass outline'},
         {key: 'resume', label: 'Résumé', icon: 'signup'}
       ],
-      activeTab: 'identity'
+      activeTab: 'identity',
+
+      identity: {name: 'George Orwell', birthdate: '1903-06-25', desc: 'Novelist, essayist, journalist and critic.'}
     };
 
     this.onTabChange = this.onTabChange.bind(this);
@@ -27,7 +30,11 @@ class BitKariero extends React.Component {
   render () {
     return (
       <div>
-        <BK_Menu tabs={this.state.tabs} initialTab={this.state.activeTab} onTabChange={this.onTabChange} />
+        <BK_Menu tabs={this.state.tabs} activeTab={this.state.activeTab} onChange={this.onTabChange} />
+
+        { this.state.activeTab == 'identity' &&
+          <BK_Identity identity={this.state.identity}/>
+        }
       </div>
     );
   }

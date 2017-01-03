@@ -5,34 +5,32 @@ import { Menu, Icon, Label } from 'semantic-ui-react'
 export default class BK_Menu extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      activeItem: props.initialTab
-    }
 
     this.handleItemClick = this.handleItemClick.bind(this)
   }
 
   handleItemClick(e, { name }) {
-    this.setState({ activeItem: name });
-    this.props.onTabChange(this.state.activeItem);
+    this.props.onChange(name);
   }
 
   render() {
-    const { activeItem } = this.state;
+    const { activeTab } = this.props;
     const { tabs } = this.props;
-
-    console.log(activeItem);
 
     var parent = this;
 
     return (
-      <Menu icon='labeled' widths={this.props.tabs.length}>
+      <Menu fluid icon='labeled' widths={1 + this.props.tabs.length}>
+        <Menu.Item>
+          <img src='img/logo-large.png' className='bk-menu-logo' />
+        </Menu.Item>
+
         {tabs.map(function(tab, i) {
           return (
             <Menu.Item
               name={tab.key}
               key={tab.key}
-              active={activeItem === tab.key}
+              active={activeTab === tab.key}
               onClick={parent.handleItemClick}
             >
               <Icon name={tab.icon} />
