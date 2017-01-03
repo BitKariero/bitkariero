@@ -2,6 +2,7 @@ import React from 'react';
 import {render} from 'react-dom';
 import { Menu, Icon, Label} from 'semantic-ui-react';
 import BK_RequestButton from './request-button.jsx';
+import { tabs } from '../common.jsx';
 
 
 export default class BK_Menu extends React.Component {
@@ -17,14 +18,13 @@ export default class BK_Menu extends React.Component {
 
   render() {
     const { activeTab } = this.props;
-    const { tabs } = this.props;
 
     var parent = this;
 
     return (
-      <Menu fluid icon='labeled' widths={1 + this.props.tabs.length + 1}>
+      <Menu stackable fluid icon='labeled' widths={1 + tabs.length + 1}>
         <Menu.Item>
-          <img src='img/logo-large.png' className='bk-menu-logo' />
+          <img src='img/logo-large.png' id='bk-menu-logo' />
         </Menu.Item>
 
         {tabs.map(function(tab, i) {

@@ -1,3 +1,9 @@
-.bk-menu-logo {
-  width: 85% !important;
+#bk-menu-logo {
+  width: 85%;
+}
+
+#bk-request-button {
+  max-width: 12em;
+  height: 100%;
+  font-size: 1.2em !important;
 }
