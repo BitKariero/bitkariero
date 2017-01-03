@@ -1,7 +1,7 @@
 import React from 'react';
 import {render} from 'react-dom';
-import BK_Menu from './components/menu.jsx'
-import BK_Identity from './components/identity.jsx'
+import BK_Menu from './components/menu.jsx';
+import BK_Identity from './components/identity.jsx';
 
 class BitKariero extends React.Component {
   constructor() {
