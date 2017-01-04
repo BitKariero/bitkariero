@@ -11,7 +11,7 @@ var config = {
   },
 
   watchOptions: {
-    poll: 1000
+    poll: 2500
   },
 
   module: {
