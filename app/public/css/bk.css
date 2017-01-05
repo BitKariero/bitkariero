@@ -13,7 +13,7 @@
   width: 100%;
 }
 
-#bk-identity-shortdesc {
+.bk-identity-shortdesc {
   font-size: 0.6em;
   color: rgba(0,0,0,.4);
   width: 100%;
@@ -22,7 +22,11 @@
   text-overflow:ellipsis;
 }
 
-#bk-identity-card {
+.bk-identity-shortdesc input {
+  font-size: 0.6em !important;
+}
+
+.bk-identity-card {
   margin-left: auto;
   margin-right: auto;
 }
@@ -34,4 +38,20 @@ span.bk-identity-field {
 p.bk-identity-field {
   margin: 1em;
   text-align: justify;
+}
+
+div.bk-identity-field {
+  margin-left: 1em;
+}
+
+div.bk-identity-field {
+  margin: 1em;
+}
+
+
+textarea.bk-identity-field {
+  display: block;
+  width: 100% !important;
+  resize: none;
+  overflow: auto;
 }
