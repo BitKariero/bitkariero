@@ -16,7 +16,7 @@ export const identityFields = {
   shortdesc: {key: 'shortdesc', label: '', icon: '', shownInHeader: true},
   birthdate: {key: 'birthdate', label: 'Birth date', icon: 'calendar'},
   email: {key: 'email', label:' E-mail', icon: 'mail outline'},
-  longdesc: {key: 'longdesc', label: 'Description', icon: 'info circle'},
+  longdesc: {key: 'longdesc', label: 'Description', icon: 'info circle', longForm: true},
 };
 
 export const identityDisplayOrder = [
