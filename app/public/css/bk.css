@@ -27,6 +27,10 @@
   margin-right: auto;
 }
 
+bk-margin {
+  margin-left: 10%;
+}
+
 span.bk-identity-field {
   margin-left: 1em;
 }
@@ -34,4 +38,9 @@ span.bk-identity-field {
 p.bk-identity-field {
   margin: 1em;
   text-align: justify;
+}
+
+p.labelDist
+{
+  margin: 1em;
 }
