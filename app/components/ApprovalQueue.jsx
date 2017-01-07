@@ -2,77 +2,66 @@ import React from 'react';
 import {render} from 'react-dom';
 import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label } from 'semantic-ui-react';
 
-export default class BK_Records extends React.Component {
+export default class BK_ApprovalQueue extends React.Component {
   constructor(props) {
     super(props);
   }
+
   render() {
-    const { records } = this.props;
-    console.log(records);
+    const { approvalqueue } = this.props;
+    console.log(approvalqueue);
 
     return (
       <div>
       <Header as='h2' icon textAlign='center'>
-     <Icon name='check circle' circular />
+     <Icon name='wait' circular />
      <Header.Content>
-       Verified Requests
+        Pending Requests
      </Header.Content>
      </Header>
-        { records.map(function(record, i) {
+        { approvalqueue.map(function(object, i) {
             return (
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Image src={'img/' + record.id + '.png'} shape='circular' size='small'/>
+                    <Image src={'img/' + object.id + '.png'} shape='circular' size='small'/>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
                         <Grid.Row>
                           <Grid.Column floated='left' width={10}>
-                            <Header as='h1'>{record.company}</Header>
-                            <Header as='h2'><i>{record.role}</i></Header>
-                            <Header as='h3'><i>{record.location}</i></Header>
+                            <Header as='h1'>{object.company}</Header>
+                            <Header as='h2'><i>{object.role}</i></Header>
+                            <Header as='h3'><i>{object.location}</i></Header>
                           </Grid.Column>
                           <Grid.Column floated='right' width={3}>
                             <Container textAlign='left'>
                               <Label as='a'>
                                    <Icon name='calendar' />Date
                              </Label>
-                             {"     " + record.date}
+                             {"     " + object.date}
                            </Container>
                            <br/>
                            <Container textAlign='left'>
                              <Label as='a'>
                                   <Icon name='clock' />Time
                             </Label>
-                            {"     " + record.time}
+                            {"     " + object.time}
                            </Container>
                           </Grid.Column>
                         </Grid.Row>
 
                         <Grid.Row>
-                          <Grid.Column floated='left' width={16}>
+                          <Grid.Column floated='left' width={10}>
                             <Container textAlign='justified'>
-                              <b>{record.recordType}</b>
-                              <Divider />
-                              <Accordion>
-                                <Accordion.Title>
-                                  <Icon name='dropdown' />
-                                  See full {record.recordType}
-                                </Accordion.Title>
-                                <Accordion.Content>
-                                  <p>
-                                    {record.content}
-                                  </p>
-                                </Accordion.Content>
-                                </Accordion>
+                              <b>{object.recordType}</b>
                             </Container>
                           </Grid.Column>
                         </Grid.Row>
                       </Grid>
                   </Grid.Column>
               </Grid>
-              </div>
+            </div>
             );
           })}
       </div>
