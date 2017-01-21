@@ -7,42 +7,37 @@ var pump = require('pump');
 // webpack
 var webpack = require('webpack-stream');
 var WebpackConfig = require('./webpack.config.js');
+var exec = require('child_process').exec;
+var run = require('gulp-run-command').default
 
-gulp.task('build', ['webpack:build']);
-gulp.task('watch', ['webpack:watch', 'webserver']);
-
-gulp.task('webserver', function(cb) {
-  pump([
-    gulp.src('app/public/'),
-    webserver({
-      host: '0.0.0.0',
-      directoryListing: {
-        enable:true,
-        path: 'app/public/'
-      },
-      livereload: true,
-      open: true
-    })
-  ], cb);
-});
+gulp.task('build', ['build-frontend'], run('embark build'));
+gulp.task('build-frontend', ['webpack:build', 'copy']);
+gulp.task('copy', ['copy-images', 'copy-bitkariero']);
 
 gulp.task('webpack:build', function(cb) {
   pump([
     gulp.src('app'),
     webpack(WebpackConfig),
     uglify(),
-    gulp.dest('app/public/')
+    gulp.dest('dist/')
   ], cb);
 });
 
-gulp.task('webpack:watch', function(cb){
-  // Modify the config to include the watch option
-  var wpWatchConfig = Object.create(WebpackConfig);
-  wpWatchConfig.watch = true;
-
+gulp.task('copy-images', function(cb){
   pump([
-    gulp.src('app'),
-    webpack(wpWatchConfig),
-    gulp.dest('app/public/')
+    gulp.src('app/public/img/*'),
+    gulp.dest('dist/img/')
   ], cb);
+});
+
+gulp.task('copy-bitkariero', function(cb){
+  pump([
+    gulp.src('app/bitkariero.js'),
+    gulp.dest('dist/')
+  ], cb);
+
+});
+
+gulp.task('watch', function() {
+  gulp.watch('app/**/*' , ['build-frontend']);
 });

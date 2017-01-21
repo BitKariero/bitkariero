@@ -3,6 +3,10 @@
 ## Set-up
 
 * Clone the repository
-* Run `npm install` to get the required
-* `gulp watch` to run a livereload server
-* Access it on 'http://localhost:8000'
+* Run `npm install` to get the project's dependencies
+
+## Development
+* `gulp watch` to build the front-end on change
+* `embark simulator` or `embark blockchain`
+* `embark run` to build & deploy contracts on change, run server
+* Access app on 'http://localhost:8000'
