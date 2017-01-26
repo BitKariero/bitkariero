@@ -12,7 +12,7 @@ var run = require('gulp-run-command').default
 
 gulp.task('build', ['build-frontend'], run('embark build'));
 gulp.task('build-frontend', ['webpack:build', 'copy']);
-gulp.task('copy', ['copy-images', 'copy-bitkariero']);
+gulp.task('copy', ['copy-images', 'copy-bitkariero', 'copy-contracts']);
 
 gulp.task('webpack:build', function(cb) {
   pump([
@@ -27,6 +27,13 @@ gulp.task('copy-images', function(cb){
   pump([
     gulp.src('app/public/img/*'),
     gulp.dest('dist/img/')
+  ], cb);
+});
+
+gulp.task('copy-contracts', function(cb){
+  pump([
+    gulp.src('app/contracts/*'),
+    gulp.dest('dist/contracts/')
   ], cb);
 });
 

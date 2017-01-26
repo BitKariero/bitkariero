@@ -1,5 +1,12 @@
 node_modules/
+.node*
+
 app/public/bundle.js
+dist/
+
+.embark/
+chains.json
+
 *.bak
 *.swp
 *~
