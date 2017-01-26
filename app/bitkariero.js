@@ -16,7 +16,7 @@ var BitKariero = new function() {
         var code = xhr.responseText;
         var compiled = web3.eth.compile.solidity(code);
         var abi = compiled[contractName].info.abiDefinition;
-        BK[contractName] = new EmbarkJS.Contract({abi: abi, code: compiled});
+        BK[contractName] = new EmbarkJS.Contract({abi: abi, code: compiled[contractName].code});
       }
     };
   };
