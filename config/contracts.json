@@ -2,7 +2,6 @@
   "default": {
     "gas": "auto",
     "contracts": {
-      "PlainReference": {}
     }
   }
 }

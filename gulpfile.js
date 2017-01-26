@@ -1,8 +1,8 @@
 // gulp
 var gulp = require('gulp');
 var uglify = require('gulp-uglify');
-var webserver = require('gulp-webserver');
 var pump = require('pump');
+var connect = require('gulp-connect');
 
 // webpack
 var webpack = require('webpack-stream');
@@ -45,6 +45,16 @@ gulp.task('copy-bitkariero', function(cb){
 
 });
 
-gulp.task('watch', function() {
-  gulp.watch('app/**/*' , ['build-frontend']);
+gulp.task('connect', function() {
+  connect.server({
+    root: './dist',
+    port: 8000,
+    host: '0.0.0.0'
+  });  
 });
+
+gulp.task('watch', function() {
+  gulp.watch('app/**/*' , ['build']);
+});
+
+gulp.task('default', ['connect', 'watch']);
