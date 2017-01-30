@@ -8,6 +8,7 @@ import BK_ApprovalQueue from './components/ApprovalQueue.jsx';
 class BitKariero extends React.Component {
   constructor() {
     super();
+    BitKarieroAPI.init();
     this.state = {
       activeTab: 'identity',
       identity: {
