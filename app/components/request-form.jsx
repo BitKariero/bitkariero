@@ -9,9 +9,11 @@ export default class BK_RequestForm extends React.Component {
 
   constructor(props) {
     super(props);
-    
-    //BitKarieroAPI.init();
-    this.state = {addrValue: BitKarieroAPI.ownAddress};
+
+    if(!BK.ownAddress) {
+      BK.init();
+    }
+    this.state = {addrValue: BK.ownAddress};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -22,20 +24,19 @@ export default class BK_RequestForm extends React.Component {
   }
 
   handleSubmit(event) {
-  
     event.preventDefault();
-    var myp = BitKarieroAPI.requestRecord(BitKarieroAPI.PlainReference, this.state.addrValue);
+    var myp = BK.requestRecord(BK.PlainReference, this.state.addrValue);
     console.log(myp);
     myp.then(
         function(val) {
             console.log("got promise" + val);
         }
     );
-    
-        
+
+
     alert(this.state.addrValue);
   }
-  
+
   render() {
     return (
       <Form onSubmit={this.handleSubmit}>

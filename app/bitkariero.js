@@ -1,4 +1,4 @@
-var BitKarieroAPI = new function() {
+var BK = new function() {
   var BK = this;
 
   this.ownAddress = null;
