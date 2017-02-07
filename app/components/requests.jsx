@@ -2,14 +2,14 @@ import React from 'react';
 import {render} from 'react-dom';
 import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label } from 'semantic-ui-react';
 
-export default class BK_ApprovalQueue extends React.Component {
+export default class BK_Requests extends React.Component {
   constructor(props) {
     super(props);
   }
 
   render() {
-    const { approvalqueue } = this.props;
-    console.log(approvalqueue);
+    const { requests } = this.props;
+    console.log(requests);
 
     return (
       <div>
@@ -19,7 +19,7 @@ export default class BK_ApprovalQueue extends React.Component {
         Pending Requests
      </Header.Content>
      </Header>
-        { approvalqueue.map(function(object, i) {
+        { requests.map(function(object, i) {
             return (
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>

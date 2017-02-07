@@ -3,11 +3,12 @@ import {render} from 'react-dom';
 import BK_Menu from './components/menu.jsx';
 import BK_Identity from './components/identity.jsx';
 import BK_Records from './components/records.jsx';
-import BK_ApprovalQueue from './components/ApprovalQueue.jsx';
+import BK_Requests from './components/requests.jsx';
 
 class BitKariero extends React.Component {
   constructor() {
     super();
+    BK.init();
     this.state = {
       activeTab: 'identity',
       identity: {
@@ -27,7 +28,7 @@ class BitKariero extends React.Component {
         {id: 'SABIS', location: 'Lahore, Pakistan', company: 'SABIS International School of Choueifat', recordType: 'Teacher Recommendation', role: 'Instructor Mathematics -Mr. Rumi Jalaluddin', date: '19/02/11 UTC', time: '12:24', content: 'I have taught Mr. Happy Singh Mathematics for four years in the CIE Cambridge Ordinary and College Board Advanced Placement Examinations. Being his teacher I can vouch that he is one of the most brilliant and conscientious student that I have encountered in my entire teaching career. He has a very comprehensive understanding of the subjects and has excellent analytical skills.'},
         {id: 'SABIS', location: 'Lahore, Pakistan', company: 'SABIS International School of Choueifat', recordType: 'Peer Recommendation', role: 'Peer - Bubbly Shah', date: '13/02/11', time: 'UTC: 10:52', content: 'We both have grown in the ten years we have known each other. We went through some of the same difficulties and challenges at the same time; growing up, adapting to high school, relationships, the SATs, and of course, wearing braces and programming all day in the Computer Lab while everyone was dating as we both were nerds and will remain nerds.'},
       ],
-      approvalqueue: [
+      requests: [
         {id: 'MIT', location: '77 Massachusetts Ave, Cambridge, MA 02139, USA', company: 'Massachusetts Institute of Technology', recordType: 'MSc Computer Science', role: 'Department of Admissions', date: '20/07/17', time: 'UTC 15:43'},
         {id: 'HSBC', location: 'London, United Kingdom', company: 'The Hongkong and Shanghai Banking Corporation Limited', recordType: 'Reference', role: 'Instructor - FinTech Course FN101', date: '11/04/15', time: 'UTC: 14:55'},
         {id: 'FIDELTY', location: 'London, United Kingdom', company: 'Fidelity International Limited', recordType: 'Reference', role: 'Internship Coordinator - Spring Week 2015', date: '03/03/13', time: 'UTC: 14:25'},
@@ -58,8 +59,8 @@ class BitKariero extends React.Component {
         { this.state.activeTab == 'records' &&
           <BK_Records records={this.state.records}/>
         }
-        { this.state.activeTab == 'approvalqueue' &&
-          <BK_ApprovalQueue approvalqueue={this.state.approvalqueue}/>
+        { this.state.activeTab == 'requests' &&
+          <BK_Requests requests={this.state.requests}/>
         }
       </div>
     );

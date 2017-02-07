@@ -1,4 +1,4 @@
-var BitKariero = new function() {
+var BK = new function() {
   var BK = this;
 
   this.ownAddress = null;
@@ -30,7 +30,7 @@ var BitKariero = new function() {
   }
 
   this.requestRecord = function(type, from) {
-    type.deploy().then(function(sc) {
+    return type.deploy().then(function(sc) {
       sc.bkref(from);
       return sc;
     }).then(function(sc) {
