@@ -3,6 +3,7 @@ var gulp = require('gulp');
 var uglify = require('gulp-uglify');
 var pump = require('pump');
 var connect = require('gulp-connect');
+var cors = require('cors');
 
 // webpack
 var webpack = require('webpack-stream');
@@ -48,9 +49,12 @@ gulp.task('copy-bitkariero', function(cb){
 gulp.task('connect', function() {
   connect.server({
     root: './dist',
+    middleware: function() {
+    return [cors()];
+    },
     port: 8000,
     host: '0.0.0.0'
-  });  
+  });
 });
 
 gulp.task('watch', function() {
