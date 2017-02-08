@@ -21,6 +21,42 @@ var BK = new function() {
     };
   };
 
+  /* IPFS */
+  this.get = function(hash) {
+    return new Promise(function (resolve, reject) {
+      var url = EmbarkJS.Storage.getUrl(hash)
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+
+      xhr.onload = function () {
+        if (this.status >= 200 && this.status < 300) {
+          resolve(xhr.response);
+        } else {
+          reject({
+            status: this.status,
+            statusText: xhr.statusText
+          });
+        }
+      };
+
+      xhr.onerror = function () {
+        reject({
+          status: this.status,
+          statusText: xhr.statusText
+        });
+      };
+      xhr.send();
+    });
+  }
+
+  this.put = function(content){
+    return EmbarkJS.Storage.saveText(content);
+  }
+
+  this.log = function(content) {
+    console.log(content);
+  }
+
   /* Initialize */
   this.init = function(addr) {
     this.ownAddress = addr ? addr : web3.eth.accounts[0];
