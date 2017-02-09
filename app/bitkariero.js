@@ -22,52 +22,108 @@ var BK = new function() {
   };
 
   /* IPFS */
-  this.get = function(hash) {
-    return new Promise(function (resolve, reject) {
-      // If we have the content locally, no need for a request
-      var local = localStorage.getItem(hash);
-      if (local) {
-        resolve(local);
-      }
+  this.ipfs = new function() {
+    var ipfs = this;
 
-      else {
-        var url = EmbarkJS.Storage.getUrl(hash)
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
+    this.blobToB64String = function(blob){
+      function _arrayBufferToBase64(buffer) {
+          var binary = '';
+          var bytes = new Uint8Array(buffer);
+          var len = bytes.byteLength;
 
-        xhr.onload = function () {
-          if (this.status >= 200 && this.status < 300) {
-            // Store valid responses locally
-            localStorage.setItem(hash, xhr.response);
+          for (var i = 0; i < len; i++) {
+              binary += String.fromCharCode(bytes[ i ]);
+          }
+          return window.btoa(binary);
+      };
 
-            resolve(xhr.response);
-          } else {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          data = reader.result;
+          resolve(_arrayBufferToBase64(data));
+        };
+
+        reader.readAsArrayBuffer(blob);
+      });
+    };
+
+    this.b64StringToBlob = function(string) {
+      function _base64ToArrayBuffer(base64) {
+        var binary_string =  window.atob(base64);
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+
+        for (var i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+      };
+
+      return new Promise(function(resolve, reject) {
+        resolve(new Blob([_base64ToArrayBuffer(string)], {type: "application/octet-stream"}));
+      });
+    };
+
+    this.get = function(hash) {
+      return new Promise(function (resolve, reject) {
+        // If we have the content locally, no need for a request
+        var local = localStorage.getItem(hash);
+        if (local) {
+          resolve(local);
+        }
+
+        else {
+          var url = EmbarkJS.Storage.getUrl(hash)
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, true);
+
+          xhr.onload = function () {
+            if (this.status >= 200 && this.status < 300) {
+              // Store valid responses locally
+              localStorage.setItem(hash, xhr.response);
+
+              resolve(xhr.response);
+            } else {
+              reject({
+                status: this.status,
+                statusText: xhr.statusText
+              });
+            }
+          };
+
+          xhr.onerror = function () {
             reject({
               status: this.status,
               statusText: xhr.statusText
             });
-          }
-        };
+          };
 
-        xhr.onerror = function () {
-          reject({
-            status: this.status,
-            statusText: xhr.statusText
-          });
-        };
+          xhr.send();
+        }
+      });
+    };
 
-        xhr.send();
+    this.put = function(content){
+      if (typeof(content) == "string") {
+        return EmbarkJS.Storage.saveText(content);
       }
-    });
-  }
 
-  this.put = function(content){
-    return EmbarkJS.Storage.saveText(content);
-  }
+      else {
+        return (
+          ipfs.blobToB64String(content)
+          .then(function(content) {
+            return EmbarkJS.Storage.saveText(content);
+          })
+        );
+      }
+    };
+
+  }();
 
   this.log = function(content) {
     console.log(content);
-  }
+  };
 
   /* Initialize */
   this.init = function(addr) {
@@ -75,7 +131,7 @@ var BK = new function() {
     this.identityContract = null;
     this.requests = [];
     this.loadContract("PlainReference", "contracts/plain_reference.sol");
-  }
+  };
 
   this.requestRecord = function(type, from) {
     return type.deploy().then(function(sc) {
@@ -111,7 +167,7 @@ var BK = new function() {
         crypto.keyPair = key;
         return key;
       });
-    },
+    };
 
     this.encrypt = function(plaintext, publicKey) {
       // Returns a Promise that yields a Blob to its
@@ -197,10 +253,14 @@ var BK = new function() {
              {type: "application/octet-stream"}
          );
       }
-    },
+    };
 
     this.decrypt = function(blob, privateKey) {
       return new Promise(function (resolve, reject) {
+        if (!privateKey) {
+          privateKey = crypto.keyPair.privateKey;
+        }
+
         var reader = new FileReader();
         reader.onload = processBlob;
         reader.readAsArrayBuffer(blob);
@@ -263,7 +323,7 @@ var BK = new function() {
           }
         }
       });
-    }
+    };
 
   }();
 }();
