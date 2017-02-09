@@ -26,13 +26,14 @@
     "webpack": "^1.14.0"
   },
   "devDependencies": {
+    "cors": "^2.8.1",
+    "embark": "^2.2.0",
     "gulp": "^3.9.1",
+    "gulp-run-command": "^0.0.7",
     "gulp-uglify": "^2.0.0",
     "gulp-webserver": "^0.9.1",
-    "gulp-run-command": "^0.0.7",
+    "mocha": "^2.2.5",
     "pump": "^1.0.2",
-    "webpack-stream": "^3.2.0",
-    "embark": "^2.2.0",
-    "mocha": "^2.2.5"
+    "webpack-stream": "^3.2.0"
   }
 }
