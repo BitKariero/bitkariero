@@ -24,28 +24,40 @@ var BK = new function() {
   /* IPFS */
   this.get = function(hash) {
     return new Promise(function (resolve, reject) {
-      var url = EmbarkJS.Storage.getUrl(hash)
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", url, true);
+      // If we have the content locally, no need for a request
+      var local = localStorage.getItem(hash);
+      if (local) {
+        resolve(local);
+      }
 
-      xhr.onload = function () {
-        if (this.status >= 200 && this.status < 300) {
-          resolve(xhr.response);
-        } else {
+      else {
+        var url = EmbarkJS.Storage.getUrl(hash)
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+
+        xhr.onload = function () {
+          if (this.status >= 200 && this.status < 300) {
+            // Store valid responses locally
+            localStorage.setItem(hash, xhr.response);
+
+            resolve(xhr.response);
+          } else {
+            reject({
+              status: this.status,
+              statusText: xhr.statusText
+            });
+          }
+        };
+
+        xhr.onerror = function () {
           reject({
             status: this.status,
             statusText: xhr.statusText
           });
-        }
-      };
+        };
 
-      xhr.onerror = function () {
-        reject({
-          status: this.status,
-          statusText: xhr.statusText
-        });
-      };
-      xhr.send();
+        xhr.send();
+      }
     });
   }
 
