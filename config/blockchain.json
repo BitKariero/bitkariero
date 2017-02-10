@@ -15,7 +15,7 @@
   },
   "testnet": {
     "networkType": "testnet",
-    "rpcHost": "localhost",
+    "rpcHost": "192.168.33.1",
     "rpcPort": 8545
   },
   "livenet": {

@@ -12,6 +12,10 @@ var exec = require('child_process').exec;
 var run = require('gulp-run-command').default
 
 gulp.task('build', ['build-frontend'], run('embark build'));
+
+//testnet
+gulp.task('build-testnet', ['build-frontend'], run('./embarktestnet.sh'));
+
 gulp.task('build-frontend', ['webpack:build', 'copy']);
 gulp.task('copy', ['copy-images', 'copy-bitkariero', 'copy-contracts']);
 
@@ -40,7 +44,7 @@ gulp.task('copy-contracts', function(cb){
 
 gulp.task('copy-bitkariero', function(cb){
   pump([
-    gulp.src('app/bitkariero.js'),
+    gulp.src('app/*.js'),
     gulp.dest('dist/')
   ], cb);
 
@@ -50,15 +54,16 @@ gulp.task('connect', function() {
   connect.server({
     root: './dist',
     middleware: function() {
-    return [cors()];
+      return [cors()];
     },
     port: 8000,
     host: '0.0.0.0'
   });
+
 });
 
 gulp.task('watch', function() {
-  gulp.watch('app/**/*' , ['build']);
+  gulp.watch('app/**/*' , ['build-testnet']);
 });
 
 gulp.task('default', ['connect', 'watch']);

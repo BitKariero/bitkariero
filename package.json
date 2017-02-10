@@ -26,9 +26,8 @@
     "webpack": "^1.14.0"
   },
   "devDependencies": {
-    "embark": "^2.2.0",
-    "gulp": "^3.9.1",
     "gulp-connect": "^5.0.0",
+    "cors": "^2.8.1",
     "gulp-run-command": "^0.0.7",
     "gulp-uglify": "^2.0.0",
     "gulp-webserver": "^0.9.1",
