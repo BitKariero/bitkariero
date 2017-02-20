@@ -53,12 +53,13 @@ gulp.task('copy-bitkariero', function(cb){
 gulp.task('connect', function() {
   connect.server({
     root: './dist',
-    port: 8000,
-    host: '0.0.0.0',
     middleware: function() {
       return [cors()];
-    }
-  });  
+    },
+    port: 8000,
+    host: '0.0.0.0'
+  });
+
 });
 
 gulp.task('watch', function() {
