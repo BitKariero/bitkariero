@@ -6,16 +6,16 @@
     "mineWhenNeeded": true,
     "nodiscover": true,
     "maxpeers": 0,
-    "rpcHost": "192.168.33.10",
+    "rpcHost": "127.0.0.1",
     "rpcPort": 8545,
-    "rpcCorsDomain": "http://192.168.33.10:8000",
+    "rpcCorsDomain": "*",
     "account": {
       "password": "config/development/password"
     }
   },
   "testnet": {
     "networkType": "testnet",
-    "rpcHost": "192.168.33.1",
+    "rpcHost": "127.0.0.1",
     "rpcPort": 8545
   },
   "livenet": {
