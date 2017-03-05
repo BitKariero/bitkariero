@@ -177,14 +177,14 @@ var BK = new function() {
     var crypto = this;
 
     this.init = function() {
-      BK.crypto.KeyStore.open().then(function() {
-        BK.crypto.KeyStore.getKey("name", "own").then(function(storedKey) {
+      BK.crypto.keyStore.open().then(function() {
+        BK.crypto.keyStore.getKey("name", "own").then(function(storedKey) {
           if (storedKey) {
             BK.crypto.keyPair = storedKey;
           }
           else {
             BK.crypto.genKeyPair().then(function(x) {
-              BK.crypto.KeyStore.saveKey(x.publicKey, x.privateKey, "own").then(function() {
+              BK.crypto.keyStore.saveKey(x.publicKey, x.privateKey, "own").then(function() {
                 BK.crypto.init();
               });
             });
@@ -247,7 +247,7 @@ var BK = new function() {
       self.saveKey = function(publicKey, privateKey, name) {
           return new Promise(function(fulfill, reject) {
               if (!self.db) {
-                  reject(new Error("KeyStore is not open."));
+                  reject(new Error(self.dbName + "is not open."));
               }
 
               window.crypto.subtle.exportKey('spki', publicKey).
@@ -306,7 +306,7 @@ var BK = new function() {
       self.listKeys = function() {
           return new Promise(function(fulfill, reject) {
               if (!self.db) {
-                  reject(new Error("KeyStore is not open."));
+                  reject(new Error(self.dbName + "is not open."));
               }
 
               var list = [];
@@ -332,7 +332,7 @@ var BK = new function() {
       self.close = function() {
           return new Promise(function(fulfill, reject) {
               if (!self.db) {
-                  reject(new Error("KeyStore is not open."));
+                  reject(new Error(self.dbName + "is not open."));
               }
 
               self.db.close();
