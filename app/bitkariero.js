@@ -19,7 +19,13 @@ var BK = new function() {
         var compiled = web3.eth.compile.solidity(code);
         for (var i = 0; i < contractNames.length; i++) {
             /*<stdin> is needed for solc 0.4.9, slice(2) is needed since 0x is appended elsewhere */
-          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiled['<stdin>:' + contractNames[i]].info.abiDefinition, code: compiled['<stdin>:' + contractNames[i]].code.slice(2)});              
+            var compiledSingle = null;
+            if ('<stdin>:' + contractNames[i] in  compiled) {
+                compiledSingle = compiled['<stdin>:' + contractNames[i]];
+            } else {
+                compiledSingle = compiled[contractNames[i]];
+            }
+          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiledSingle.info.abiDefinition, code: compiledSingle.code.slice(2)});              
         }
         typeof callback === 'function' && callback();
       }
