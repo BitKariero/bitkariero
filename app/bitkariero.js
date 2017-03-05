@@ -135,7 +135,7 @@ var BK = new function() {
     this.ownAddress = addr ? addr : web3.eth.accounts[0];
     this.identityContract = null;
     this.requests = [];
-    this.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkRevocable"], "contracts/danish_contracts.sol", null);
+    this.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkRevocable"], "contracts/contracts.sol", null);
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
     });
