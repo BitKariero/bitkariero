@@ -3,12 +3,21 @@ pragma solidity ^0.4.0;
 contract bkContract {
     /* owner and organisation address */
     address public owner;
-    address public organisation;
+    address public provider;
 
-    function bkContract(address _organisation) {
-        /* owner and organisation address */
+    modifier onlyOwner() {
+        if (msg.sender != owner) throw;
+        _;
+    }
+
+    modifier onlyProvider() {
+        if (msg.sender != provider) throw;
+        _;
+    }
+
+    function bkContract(address _provider) {
         owner = msg.sender;
-        organisation = _organisation;
+        provider = _provider;
     }
 }
 
@@ -27,16 +36,12 @@ contract bkMembership is bkRevocable {
 
     function bkMembership(address _y) bkRevocable(_y) {}
 
-    function revoke() {
-        if(msg.sender == organisation) {
-            super.revoke();
-        }
+    function revoke() onlyProvider(){
+        super.revoke();
     }
 
-    function addContent(string _content) public {
-        if(msg.sender == organisation) {
-            content = _content;
-        }
+    function addContent(string _content) onlyProvider() public {
+        content = _content;
     }
 }
 
@@ -50,10 +55,8 @@ contract bkReference is bkUnRevocable {
 
     function bkReference(address _y) bkUnRevocable(_y) {}
 
-    function addReference(string _reference) public {
-        if(msg.sender == organisation) {
-            reference = _reference;
-        }
+    function addReference(string _reference) onlyProvider() public {
+        reference = _reference;
     }
 }
 
@@ -62,11 +65,17 @@ contract bkIdentity {
     string public ownerName;
     string public ownerDOB;
 
-    address[] public providers;
+    mapping(address => bool) public providers;
     address[] public vouches;
 
-    function getProvidersCount() public constant returns(uint) {
-        return providers.length;
+    modifier onlyOwner() {
+        if (msg.sender != owner) throw;
+        _;
+    }
+
+    modifier onlyProviders() {
+        if (providers[msg.sender] != true) throw;
+        _;
     }
 
     function bkIdentity(address _owner, string _ownerName, string _ownerDOB) {
@@ -75,49 +84,19 @@ contract bkIdentity {
         ownerDOB  = _ownerDOB;
     }
 
-    function addProvider(address _provider) returns (bool) {
-        bool added = false;
-        if(msg.sender == owner) {
-            providers.push(_provider);
-            added = true;
-        }
-        return added;
+    function addProvider(address _provider) onlyOwner() {
+        providers[_provider] = true;
     }
 
-    function removeProvider(address _provider) returns (bool) {
-        bool isRemoved = false;
-        if(msg.sender == owner) {
-            bool removedProvider = false;
-            for(uint i = 0; i < providers.length; i++) {
-                if(providers[i] == _provider) {
-                    delete providers[i];
-                    isRemoved = true;
-                }
-            }
-        }
-        return isRemoved;
+    function removeProvider(address _provider) onlyOwner() {
+        providers[_provider] = false;
     }
 
-    function vouch() returns (bool) {
-        address voucher = msg.sender;
-        bool canVouch = false;
-
-        for(uint i = 0; i < providers.length; i++) {
-            if(providers[i] == voucher) {
-                canVouch = true;
-            }
-        }
-
-        if(canVouch) {
-        vouches.push(voucher);
-        }
-
-        return canVouch;
+    function vouch() onlyProviders() {
+        vouches.push(msg.sender);
     }
 
-    function unVouch() returns (bool) {
-        bool hasUnVouched = false;
-
+    function unVouch() onlyProviders() {
         for(uint i = 0; i < vouches.length; i++) {
             if(vouches[i] == msg.sender) {
                 if(i != vouches.length - 1) {
@@ -129,10 +108,7 @@ contract bkIdentity {
                     delete vouches[vouches.length - 1];
                     vouches.length--;
                 }
-                hasUnVouched = true;
             }
         }
-
-        return hasUnVouched;
     }
 }
