@@ -18,9 +18,10 @@ var BK = new function() {
         var code = xhr.responseText;
         var compiled = web3.eth.compile.solidity(code);
         for (var i = 0; i < contractNames.length; i++) {
-          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiled[contractNames[i]].info.abiDefinition, code: compiled[contractNames[i]].code});              
+            /*<stdin> is needed for solc 0.4.9, slice(2) is needed since 0x is appended elsewhere */
+          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiled['<stdin>:' + contractNames[i]].info.abiDefinition, code: compiled['<stdin>:' + contractNames[i]].code.slice(2)});              
         }
-        callback();
+        typeof callback === 'function' && callback();
       }
     };
   };
