@@ -112,3 +112,30 @@ contract bkIdentity {
         }
     }
 }
+
+contract bkFloating {
+    address public owner;
+    address public provider;
+    bytes32 public secret;
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) throw;
+        _;
+    }
+
+    modifier onlyProvider() {
+        if (msg.sender != provider) throw;
+        _;
+    }
+
+    function bkFloating(bytes32 _hash) {
+        provider = msg.sender;
+        secret = _hash;
+    }
+
+    function claim(string _guess) {
+        if (sha3(_guess) == secret) {
+            owner = msg.sender;
+        }
+    }
+}
