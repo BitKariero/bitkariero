@@ -6,7 +6,7 @@ var BK = new function() {
   this.requests = [];
   this.PlainReference = null;
   this.mainContract = null;
-  
+
 
   /* Contracts */
   this.loadContract = function(contractNames, url, callback) {
@@ -25,7 +25,7 @@ var BK = new function() {
             } else {
                 compiledSingle = compiled[contractNames[i]];
             }
-          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiledSingle.info.abiDefinition, code: compiledSingle.code.slice(2)});              
+          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiled['<stdin>:' + contractNames[i]].info.abiDefinition, code: compiled['<stdin>:' + contractNames[i]].code.slice(2)});
         }
         typeof callback === 'function' && callback();
       }
@@ -145,6 +145,9 @@ var BK = new function() {
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
     });
+
+    // Crypto
+    BK.crypto.init();
   }
 
   this.requestRecord = function(type, from) {
@@ -159,12 +162,12 @@ var BK = new function() {
       return sc;
     })
   };
-  
+
   //create identityContract
   this.createId = function(fullname, dob) {
       return BK.bkIdentity.deploy([fullname, dob]);
   }
-  
+
 
   this.provideRecord = function(record, str) {
     record.addref(str);
@@ -179,6 +182,23 @@ var BK = new function() {
   this.crypto = new function() {
     var crypto = this;
 
+    this.init = function() {
+      BK.crypto.keyStore.open().then(function() {
+        BK.crypto.keyStore.getKey("name", "own").then(function(storedKey) {
+          if (storedKey) {
+            BK.crypto.keyPair = storedKey;
+          }
+          else {
+            BK.crypto.genKeyPair().then(function(x) {
+              BK.crypto.keyStore.saveKey(x.publicKey, x.privateKey, "own").then(function() {
+                BK.crypto.init();
+              });
+            });
+          }
+        });
+      });
+    };
+
     this.genKeyPair = function() {
       return window.crypto.subtle.generateKey(
       { name: "RSA-OAEP",
@@ -191,6 +211,143 @@ var BK = new function() {
         return key;
       });
     };
+
+    this.keyStore = new function() {
+      "use strict";
+      var self = this;
+      self.db = null;
+      self.dbName = "KeyStore";
+      self.objectStoreName = "keys";
+
+      self.open = function() {
+          return new Promise(function(fulfill, reject) {
+              if (!window.indexedDB) {
+                  reject(new Error("IndexedDB is not supported by this browser."));
+              }
+
+              var req = indexedDB.open(self.dbName, 1);
+              req.onsuccess = function(evt) {
+                  self.db = evt.target.result;
+                  fulfill(self);
+              };
+              req.onerror = function(evt) {
+                  reject(evt.error);
+              };
+              req.onblocked = function() {
+                  reject(new Error("Database already open"));
+              };
+
+              // If the database is being created or upgraded to a new version,
+              // see if the object store and its indexes need to be created.
+              req.onupgradeneeded = function(evt) {
+                  self.db = evt.target.result;
+                  if (!self.db.objectStoreNames.contains(self.objectStoreName)) {
+                      var objStore = self.db.createObjectStore(self.objectStoreName, {autoIncrement: true});
+                      objStore.createIndex("name", "name", {unique: false});
+                      objStore.createIndex("spki", "spki", {unique: false});
+                  }
+              };
+          });
+      };
+
+      self.saveKey = function(publicKey, privateKey, name) {
+          return new Promise(function(fulfill, reject) {
+              if (!self.db) {
+                  reject(new Error(self.dbName + "is not open."));
+              }
+
+              window.crypto.subtle.exportKey('spki', publicKey).
+              then(function(spki) {
+                  var savedObject = {
+                      publicKey:  publicKey,
+                      privateKey: privateKey,
+                      name:       name,
+                      spki:       spki
+                  };
+
+                  var transaction = self.db.transaction([self.objectStoreName], "readwrite");
+                  transaction.onerror = function(evt) {reject(evt.error);};
+                  transaction.onabort = function(evt) {reject(evt.error);};
+                  transaction.oncomplete = function(evt) {fulfill(savedObject);};
+
+                  var objectStore = transaction.objectStore(self.objectStoreName);
+                  var request = objectStore.add(savedObject);
+              }).
+              catch(function(err) {
+                  reject(err);
+              });
+          });
+      };
+
+      self.getKey = function(propertyName, propertyValue) {
+          return new Promise(function(fulfill, reject) {
+              if (!self.db) {
+                  self.open();
+              }
+
+              var transaction = self.db.transaction([self.objectStoreName], "readonly");
+              var objectStore = transaction.objectStore(self.objectStoreName);
+
+              var request;
+              if (propertyName === "id") {
+                  request = objectStore.get(propertyValue);
+              } else if (propertyName === "name") {
+                  request = objectStore.index("name").get(propertyValue);
+              } else if (propertyName === "spki") {
+                  request = objectStore.index("spki").get(propertyValue);
+              } else {
+                  reject(new Error("No such property: " + propertyName));
+              }
+
+              request.onsuccess = function(evt) {
+                  fulfill(evt.target.result);
+              };
+
+              request.onerror = function(evt) {
+                  reject(evt.target.error);
+              };
+          });
+      };
+
+      self.listKeys = function() {
+          return new Promise(function(fulfill, reject) {
+              if (!self.db) {
+                  reject(new Error(self.dbName + "is not open."));
+              }
+
+              var list = [];
+
+              var transaction = self.db.transaction([self.objectStoreName], "readonly");
+              transaction.onerror = function(evt) {reject(evt.error);};
+              transaction.onabort = function(evt) {reject(evt.error);};
+
+              var objectStore = transaction.objectStore(self.objectStoreName);
+              var cursor = objectStore.openCursor();
+
+              cursor.onsuccess = function(evt) {
+                  if (evt.target.result) {
+                      list.push({id: evt.target.result.key, value: evt.target.result.value});
+                      evt.target.result.continue();
+                  } else {
+                      fulfill(list);
+                  }
+              }
+          });
+      };
+
+      self.close = function() {
+          return new Promise(function(fulfill, reject) {
+              if (!self.db) {
+                  reject(new Error(self.dbName + "is not open."));
+              }
+
+              self.db.close();
+              self.db = null;
+              fulfill();
+          });
+      };
+    }();
+
 
     this.encrypt = function(plaintext, publicKey) {
       // Returns a Promise that yields a Blob to its
