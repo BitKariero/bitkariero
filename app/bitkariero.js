@@ -141,20 +141,17 @@ var BK = new function() {
     this.ownAddress = addr ? addr : web3.eth.accounts[0];
     this.identityContract = null;
     this.requests = [];
-    this.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkRevocable"], "contracts/contracts.sol", null);
+    this.loadContract(["bkIdentity", "bkReference", "bkMembership"], "contracts/contracts.sol", null);
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
     });
 
     // Crypto
-    BK.crypto.init();
+    //BK.crypto.init();
   }
 
-  this.requestRecord = function(type, from) {
-    //type.args = from;
-    return type.deploy([from]).then(function(sc) {
-      //sc.bkContract(from);
-      //console.log(sc);
+  this.requestReference = function(from) {
+    return this.bkReference.deploy([from]).then(function(sc) {
       BK.mainContract.addRequest(sc.address);
       return sc;
     }).then(function(sc) {
@@ -168,14 +165,34 @@ var BK = new function() {
       return BK.bkIdentity.deploy([fullname, dob]);
   }
 
-
-  this.provideRecord = function(record, str) {
-    record.addref(str);
+  //upload reference content to IPFS and add hash to SC
+  this.provideReference = function(refSCAddr, str) {
+    //upload to ipfs
+    this.ipfs.put(str).then( (hash) => {
+        //get SC
+        var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
+        refSC.addReference(hash);
+        console.log("Added reference. IPFS:" + hash + " SC:" + refSCAddr);
+    });
   };
 
-  this.getRecord = function(record) {
-    return record.reference();
+  this.getReference = function(refSCAddr) {
+    var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
+    return refSC.reference().then((hash) => {
+        console.log("IPFS hash:" + hash);
+        this.ipfs.get(hash).then( (data) => {
+            console.log("Data:" + data);
+        });
+    } );
   };
+  
+  //scan for references
+  this.scanSentReq = function() {
+    var addEvent = this.bkMain.evAddRequest({from: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    addEvent.watch(function(error, log) {
+        console.log(log);
+    });
+  }
 
   /* Crypto */
   // Adapted from https://github.com/infotechinc/public-key-encryption-in-browser/blob/master/pkcrypto.js
