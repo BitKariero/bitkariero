@@ -149,11 +149,20 @@ var BK = new function() {
     });
 
     // Crypto
-    //BK.crypto.init();
-  }
-
+    BK.crypto.init();
+  };
+  
   this.requestReference = function(from) {
-    return this.bkReference.deploy([from]).then(function(sc) {
+      return this.requestRecord(this.bkReference, from);
+  };
+  
+  this.requestMembership = function(from) {
+      return this.requestRecord(this.bkMembership, from);
+  };
+  
+
+  this.requestRecord = function(type, from) {
+    return type.deploy([from]).then(function(sc) {
       console.log("Deployed, now adding to mainBK" + sc.address);
       BK.mainContract.addRequest(sc.address);
       return sc;
@@ -167,8 +176,35 @@ var BK = new function() {
   //create identityContract
   this.createId = function(fullname, dob) {
       return BK.bkIdentity.deploy([fullname, dob]);
-  }
-
+  };
+  
+  //upload membership content to ipfs + hash to SC
+  this.provideMemebrship = function(memSCAddr, str) {
+    //upload to ipfs
+    return this.ipfs.put(str).then( (hash) => {
+        //get SC
+        var memSC = new EmbarkJS.Contract({abi: BK.bkMembership.abi, address: memSCAddr});
+        memSC.addContent(hash);
+        console.log("Added membership. IPFS:" + hash + " SC:" + memSCAddr);
+    });
+  };
+  
+  this.getMembership = function(memSCAddr) {
+    var memSC = new EmbarkJS.Contract({abi: BK.bkMembership.abi, address: memSCAddr});
+    return memSC.content().then((hash) => {
+        console.log("IPFS hash:" + hash);
+        return this.ipfs.get(hash).then( (data) => {
+            console.log("Data:" + data);
+            return data;
+        });
+    } );
+  };
+  
+  this.revokeMembership = function(memSCAddr) {
+    var memSC = new EmbarkJS.Contract({abi: BK.bkMembership.abi, address: memSCAddr});
+    memSC.revoke();
+  };
+  
   //upload reference content to IPFS and add hash to SC
   this.provideReference = function(refSCAddr, str) {
     //upload to ipfs
@@ -184,13 +220,14 @@ var BK = new function() {
     var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
     return refSC.reference().then((hash) => {
         console.log("IPFS hash:" + hash);
-        this.ipfs.get(hash).then( (data) => {
+        return this.ipfs.get(hash).then( (data) => {
             console.log("Data:" + data);
+            return data;
         });
     } );
   };
   
-  //scan for references
+  //scan for requests
   this.scanSentReq = function() {
     var addEvent = this.w3mainContact.evAddRequest({from: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
     addEvent.watch(function(error, log) {
