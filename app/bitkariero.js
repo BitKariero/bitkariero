@@ -7,7 +7,10 @@ var BK = new function() {
   this.PlainReference = null;
   this.mainContract = null;
   this.w3mainContact = null;
-
+  
+  this.addressA = "0x3fbcd77c49de8e913d6f0946f7c806c45e0658c5";
+  this.addressG = "0x5b3d49db06cf99027aa0a44a8cb2eeeff83536e5";
+  
 
   /* Contracts */
   this.loadContract = function(contractNames, url, callback) {
@@ -164,7 +167,7 @@ var BK = new function() {
   this.requestRecord = function(type, from) {
     return type.deploy([from]).then(function(sc) {
       console.log("Deployed, now adding to mainBK" + sc.address);
-      BK.mainContract.addRequest(sc.address);
+      BK.mainContract.addRequest(from, sc.address);
       return sc;
     }).then(function(sc) {
       console.log("Deployed, now adding to requests" + sc.address);
@@ -229,9 +232,9 @@ var BK = new function() {
   
   //scan for requests
   this.scanSentReq = function() {
-    var addEvent = this.w3mainContact.evAddRequest({from: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    var addEvent = this.w3mainContact.evAddRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
     addEvent.watch(function(error, log) {
-        console.log(log);
+        console.log('Block' + log.blockNumber + 'Request from' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
     });
   }
 
