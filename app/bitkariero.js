@@ -6,6 +6,7 @@ var BK = new function() {
   this.requests = [];
   this.PlainReference = null;
   this.mainContract = null;
+  this.w3mainContact = null;
 
 
   /* Contracts */
@@ -144,6 +145,7 @@ var BK = new function() {
     this.loadContract(["bkIdentity", "bkReference", "bkMembership"], "contracts/contracts.sol", null);
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
+      this.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
     });
 
     // Crypto
@@ -152,11 +154,13 @@ var BK = new function() {
 
   this.requestReference = function(from) {
     return this.bkReference.deploy([from]).then(function(sc) {
+      console.log("Deployed, now adding to mainBK" + sc.address);
       BK.mainContract.addRequest(sc.address);
       return sc;
     }).then(function(sc) {
+      console.log("Deployed, now adding to requests" + sc.address);
       BK.requests.push(sc);
-      return sc;
+      return sc
     })
   };
 
@@ -168,7 +172,7 @@ var BK = new function() {
   //upload reference content to IPFS and add hash to SC
   this.provideReference = function(refSCAddr, str) {
     //upload to ipfs
-    this.ipfs.put(str).then( (hash) => {
+    return this.ipfs.put(str).then( (hash) => {
         //get SC
         var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
         refSC.addReference(hash);
@@ -188,7 +192,7 @@ var BK = new function() {
   
   //scan for references
   this.scanSentReq = function() {
-    var addEvent = this.bkMain.evAddRequest({from: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    var addEvent = this.w3mainContact.evAddRequest({from: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
     addEvent.watch(function(error, log) {
         console.log(log);
     });
