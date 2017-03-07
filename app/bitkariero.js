@@ -6,7 +6,11 @@ var BK = new function() {
   this.requests = [];
   this.PlainReference = null;
   this.mainContract = null;
-
+  this.w3mainContact = null;
+  
+  this.addressA = "0x3fbcd77c49de8e913d6f0946f7c806c45e0658c5";
+  this.addressG = "0x5b3d49db06cf99027aa0a44a8cb2eeeff83536e5";
+  
 
   /* Contracts */
   this.loadContract = function(contractNames, url, callback) {
@@ -19,6 +23,12 @@ var BK = new function() {
         var compiled = web3.eth.compile.solidity(code);
         for (var i = 0; i < contractNames.length; i++) {
             /*<stdin> is needed for solc 0.4.9, slice(2) is needed since 0x is appended elsewhere */
+            var compiledSingle = null;
+            if ('<stdin>:' + contractNames[i] in  compiled) {
+                compiledSingle = compiled['<stdin>:' + contractNames[i]];
+            } else {
+                compiledSingle = compiled[contractNames[i]];
+            }
           BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiled['<stdin>:' + contractNames[i]].info.abiDefinition, code: compiled['<stdin>:' + contractNames[i]].code.slice(2)});
         }
         typeof callback === 'function' && callback();
@@ -135,41 +145,98 @@ var BK = new function() {
     this.ownAddress = addr ? addr : web3.eth.accounts[0];
     this.identityContract = null;
     this.requests = [];
-    this.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkRevocable"], "contracts/contracts.sol", null);
+    this.loadContract(["bkIdentity", "bkReference", "bkMembership"], "contracts/contracts.sol", null);
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
+      this.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
     });
 
     // Crypto
     BK.crypto.init();
-  }
+  };
+  
+  this.requestReference = function(from) {
+      return this.requestRecord(this.bkReference, from);
+  };
+  
+  this.requestMembership = function(from) {
+      return this.requestRecord(this.bkMembership, from);
+  };
+  
 
   this.requestRecord = function(type, from) {
-    //type.args = from;
     return type.deploy([from]).then(function(sc) {
-      //sc.bkContract(from);
-      //console.log(sc);
-      BK.mainContract.addRequest(sc.address);
+      console.log("Deployed, now adding to mainBK" + sc.address);
+      BK.mainContract.addRequest(from, sc.address);
       return sc;
     }).then(function(sc) {
+      console.log("Deployed, now adding to requests" + sc.address);
       BK.requests.push(sc);
-      return sc;
+      return sc
     })
   };
 
   //create identityContract
   this.createId = function(fullname, dob) {
       return BK.bkIdentity.deploy([fullname, dob]);
+  };
+  
+  //upload membership content to ipfs + hash to SC
+  this.provideMemebrship = function(memSCAddr, str) {
+    //upload to ipfs
+    return this.ipfs.put(str).then( (hash) => {
+        //get SC
+        var memSC = new EmbarkJS.Contract({abi: BK.bkMembership.abi, address: memSCAddr});
+        memSC.addContent(hash);
+        console.log("Added membership. IPFS:" + hash + " SC:" + memSCAddr);
+    });
+  };
+  
+  this.getMembership = function(memSCAddr) {
+    var memSC = new EmbarkJS.Contract({abi: BK.bkMembership.abi, address: memSCAddr});
+    return memSC.content().then((hash) => {
+        console.log("IPFS hash:" + hash);
+        return this.ipfs.get(hash).then( (data) => {
+            console.log("Data:" + data);
+            return data;
+        });
+    } );
+  };
+  
+  this.revokeMembership = function(memSCAddr) {
+    var memSC = new EmbarkJS.Contract({abi: BK.bkMembership.abi, address: memSCAddr});
+    memSC.revoke();
+  };
+  
+  //upload reference content to IPFS and add hash to SC
+  this.provideReference = function(refSCAddr, str) {
+    //upload to ipfs
+    return this.ipfs.put(str).then( (hash) => {
+        //get SC
+        var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
+        refSC.addReference(hash);
+        console.log("Added reference. IPFS:" + hash + " SC:" + refSCAddr);
+    });
+  };
+
+  this.getReference = function(refSCAddr) {
+    var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
+    return refSC.reference().then((hash) => {
+        console.log("IPFS hash:" + hash);
+        return this.ipfs.get(hash).then( (data) => {
+            console.log("Data:" + data);
+            return data;
+        });
+    } );
+  };
+  
+  //scan for requests
+  this.scanSentReq = function() {
+    var addEvent = this.w3mainContact.evAddRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    addEvent.watch(function(error, log) {
+        console.log('Block' + log.blockNumber + 'Request from' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
+    });
   }
-
-
-  this.provideRecord = function(record, str) {
-    record.addref(str);
-  };
-
-  this.getRecord = function(record) {
-    return record.reference();
-  };
 
   /* Crypto */
   // Adapted from https://github.com/infotechinc/public-key-encryption-in-browser/blob/master/pkcrypto.js

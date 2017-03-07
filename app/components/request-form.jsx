@@ -25,16 +25,10 @@ export default class BK_RequestForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    var myp = BK.requestRecord(BK.PlainReference, this.state.addrValue);
-    console.log(myp);
-    myp.then(
-        function(val) {
-            console.log("got promise" + val);
-        }
-    );
+    BK.requestReference(this.state.addrValue).then((sc) => {
+        console.log("Submitted at " + sc.address);
+    });
 
-
-    alert(this.state.addrValue);
   }
 
   render() {

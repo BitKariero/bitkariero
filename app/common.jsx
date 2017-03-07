@@ -6,9 +6,9 @@ export const tabs = [
 ];
 
 export const recordTypes = [
-  {key: 'reference', value: 'reference', text: 'Reference'},
-  {key: 'certificate', value: 'certificate', text: 'Certificate'},
-  {key: 'diploma', value: 'diploma', text: 'Diploma'},
+  {key: 'reference', value: 'reference', text: 'Reference'}
+  /*{key: 'membership', value: 'membership', text: 'Membership'},
+  {key: 'diploma', value: 'diploma', text: 'Diploma'}, */
 ];
 
 export const identityFields = {
