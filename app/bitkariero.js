@@ -30,7 +30,7 @@ var BK = new function() {
                 compiledSingle = compiled[contractNames[i]];
             }
 
-            if (compiledSingle.code.includes('0x0x')) {
+            if (compiledSingle.code.includes('0x')) {
               compiledSingle.code = compiledSingle.code.slice(2);
             }
             
