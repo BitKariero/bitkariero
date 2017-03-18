@@ -194,6 +194,11 @@ var BK = new function() {
       return this.requestRecord(this.bkFloatingReference, web3.sha3(secret));
   };
 
+  this.claimFloatingRecord = function(memSCAddr, secret) {
+    var memSC = new EmbarkJS.Contract({abi: BK.bkFloatingReference.abi, address: memSCAddr});
+    memSC.claim(secret);
+  };
+
   //upload membership content to ipfs + hash to SC
   this.provideMembership = function(memSCAddr, str) {
     //upload to ipfs
