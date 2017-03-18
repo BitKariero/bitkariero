@@ -1,64 +1,6 @@
 pragma solidity ^0.4.0;
 
-contract bkContract {
-    /* owner and organisation address */
-    address public owner;
-    address public provider;
 
-    modifier onlyOwner() {
-        if (msg.sender != owner) throw;
-        _;
-    }
-
-    modifier onlyProvider() {
-        if (msg.sender != provider) throw;
-        _;
-    }
-
-    function bkContract(address _provider) {
-        owner = msg.sender;
-        provider = _provider;
-    }
-}
-
-contract bkRevocable is bkContract {
-    bool isRevoked = false;
-
-    function bkRevocable(address _y) bkContract(_y) {}
-
-    function revoke() public {
-        isRevoked = true;
-    }
-}
-
-contract bkMembership is bkRevocable {
-    string public content;
-
-    function bkMembership(address _y) bkRevocable(_y) {}
-
-    function revoke() onlyProvider(){
-        super.revoke();
-    }
-
-    function addContent(string _content) onlyProvider() public {
-        content = _content;
-    }
-}
-
-contract bkUnRevocable is bkContract {
-    function bkUnRevocable(address _y) bkContract(_y) {}
-}
-
-contract bkReference is bkUnRevocable {
-    /* reference string for now */
-    string public reference;
-
-    function bkReference(address _y) bkUnRevocable(_y) {}
-
-    function addReference(string _reference) onlyProvider() public {
-        reference = _reference;
-    }
-}
 
 contract bkIdentity {
     address public owner;
@@ -113,6 +55,27 @@ contract bkIdentity {
     }
 }
 
+contract bkContract {
+    /* owner and organisation address */
+    address public owner;
+    address public provider;
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) throw;
+        _;
+    }
+
+    modifier onlyProvider() {
+        if (msg.sender != provider) throw;
+        _;
+    }
+
+    function bkContract(address _provider) {
+        owner = msg.sender;
+        provider = _provider;
+    }
+}
+
 contract bkFloating {
     address public owner;
     address public provider;
@@ -137,5 +100,49 @@ contract bkFloating {
         if (sha3(_guess) == secret) {
             owner = msg.sender;
         }
+    }
+}
+
+contract bkRevocable{
+    bool isRevoked = false;
+
+    function revoke() public {
+        isRevoked = true;
+    }
+}
+
+contract bkReference is bkContract {
+    /* reference string for now */
+    string public reference;
+
+    function bkReference(address _y) bkContract(_y) {}
+
+    function addReference(string _reference) onlyProvider() public {
+        reference = _reference;
+    }
+}
+
+contract bkFloatingReference is bkFloating {
+    /* reference string for now */
+    string public reference;
+
+    function bkFloatingReference(bytes32 _hash) bkFloating(_hash) {}
+
+    function addReference(string _reference) onlyProvider() public {
+        reference = _reference;
+    }
+}
+
+contract bkMembership is bkContract, bkRevocable {
+    string public content;
+
+    function bkMembership(address _y) bkContract(_y) {}
+
+    function revoke() onlyProvider(){
+        super.revoke();
+    }
+
+    function addContent(string _content) onlyProvider() public {
+        content = _content;
     }
 }
