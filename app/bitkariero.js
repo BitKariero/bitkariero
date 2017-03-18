@@ -145,7 +145,7 @@ var BK = new function() {
     this.ownAddress = addr ? addr : web3.eth.accounts[0];
     this.identityContract = null;
     this.requests = [];
-    this.loadContract(["bkIdentity", "bkReference", "bkMembership"], "contracts/contracts.sol", null);
+    this.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkFloating"], "contracts/contracts.sol", null);
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
       this.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
@@ -156,18 +156,18 @@ var BK = new function() {
   };
   
   this.requestReference = function(from) {
-      return this.requestRecord(this.bkReference, from);
+      return this.requestRecord(this.bkReference, from, BK.mainContract.addReferenceRequest);
   };
   
   this.requestMembership = function(from) {
-      return this.requestRecord(this.bkMembership, from);
+      return this.requestRecord(this.bkMembership, from, BK.mainContract.addMembershipRequest);
   };
   
 
-  this.requestRecord = function(type, from) {
+  this.requestRecord = function(type, from, evFunc) {
     return type.deploy([from]).then(function(sc) {
       console.log("Deployed, now adding to mainBK" + sc.address);
-      BK.mainContract.addRequest(from, sc.address);
+      evFunc(from, sc.address);
       return sc;
     }).then(function(sc) {
       console.log("Deployed, now adding to requests" + sc.address);
@@ -178,7 +178,10 @@ var BK = new function() {
 
   //create identityContract
   this.createId = function(fullname, dob) {
-      return BK.bkIdentity.deploy([fullname, dob]);
+      return BK.bkIdentity.deploy([fullname, dob]).then((sc) => {
+          BK.mainContract.addIdentity(sc.address);
+          return sc;
+      });
   };
   
   //upload membership content to ipfs + hash to SC
@@ -231,11 +234,25 @@ var BK = new function() {
   };
   
   //scan for requests
+  this.scanTo = function(callback) {
+    var addRefEvent = this.w3mainContact.evAddReferenceRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    addRefEvent.watch(callback);
+    var addMemEvent = this.w3mainContact.evAddMembershipRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    addMemEvent.watch(callback);
+  }
+
+  
+  //scan for requests
   this.scanSentReq = function() {
-    var addEvent = this.w3mainContact.evAddRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
-    addEvent.watch(function(error, log) {
+    this.scanTo(function(error, log) {
         console.log('Block' + log.blockNumber + 'Request from' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
     });
+  }
+  
+  //scan for IDs
+  this.scanIDs = function(callback) {
+      var addIDEv = this.w3mainContact.evIdentities({fromBlock:0, toBlock:'latest'});
+      addIDEv.watch(callback);
   }
 
   /* Crypto */
