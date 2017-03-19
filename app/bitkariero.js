@@ -1,6 +1,8 @@
 var BK = new function() {
   var BK = this;
 
+  var startingBlock = 700000;
+
   this.ownAddress = null;
   this.identityContract = null;
 
@@ -163,9 +165,21 @@ var BK = new function() {
     this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
       this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
       this.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
+
+      // Load results from localStorage, if exists
+      var _identities = localStorage.getItem('identities');
+      var lastScannedBlock = localStorage.getItem('lastScannedBlock');
+      if (_identities != null && _identities != '') {
+        this.identities = JSON.parse(_identities);
+        if (lastScannedBlock != null && lastScannedBlock != '') {
+          this.startingBlock = parseInt(lastScannedBlock, 10);
+        }
+      }
+
       //load identities
       this.populateIDs();
       this.populateMySCs();
+
     });
 
     // Crypto
@@ -267,12 +281,12 @@ var BK = new function() {
 
   //scan for requests
   this.populateMySCs = function() {
-    var addRefEvent = this.w3mainContact.evAddReferenceRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    var addRefEvent = this.w3mainContact.evAddReferenceRequest({to: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addRefEvent.watch((error, log) => {
         this.logScan(error, log);
         this.myReferences.push({sc: log.args.request, from: log.args.from});
     });
-    var addMemEvent = this.w3mainContact.evAddMembershipRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
+    var addMemEvent = this.w3mainContact.evAddMembershipRequest({to: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addMemEvent.watch((error, log) => {
         this.logScan(error, log);
         this.myMemberships.push({sc: log.args.request, from: log.args.from});
@@ -287,15 +301,33 @@ var BK = new function() {
 
   //scan for IDs
   this.scanIDs = function(callback) {
-      var addIDEv = this.w3mainContact.evIdentities({}, {fromBlock:0, toBlock:'latest'});
+      var addIDEv = this.w3mainContact.evIdentities({}, {fromBlock: BK.startingBlock, toBlock:'latest'});
       addIDEv.watch(callback);
   }
 
   //populate identities list
   this.populateIDs = function() {
+      var removeDuplicates = function(owner) {
+        for (var i = 0; i < BK.identities.length; i++) {
+          if (BK.identities[i].owner == owner) {
+            BK.identities.splice(i, 1);
+          }
+        }
+      };
+
       this.scanIDs( (error, log) => {
-          this.identities.push({owner: log.args.owner, identity: log.args.identity});
-          console.log('Block' + log.blockNumber + 'owner:' + log.args.owner + ' identity:' + log.args.identity);
+          var mapping = {owner: log.args.owner, identity: log.args.identity};
+
+          removeDuplicates(mapping.owner);
+          BK.identities.push(mapping);
+          localStorage.setItem('lastScannedBlock', String(log.blockNumber));
+          localStorage.setItem('identities', JSON.stringify(BK.identities));
+
+          console.log('Block' + log.blockNumber + 'owner:' + mapping.owner + ' identity:' + mapping.identity);
+
+          if(mapping.owner == BK.ownAddress) {
+            BK.identityContract = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: mapping.identity});
+          }
       });
   }
 
