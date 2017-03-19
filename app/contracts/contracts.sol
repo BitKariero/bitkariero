@@ -4,8 +4,7 @@ pragma solidity ^0.4.0;
 
 contract bkIdentity {
     address public owner;
-    string public ownerName;
-    string public ownerDOB;
+    string public info;
     string public pubKey;
 
     mapping(address => bool) public providers;
@@ -21,14 +20,17 @@ contract bkIdentity {
         _;
     }
 
-    function bkIdentity(string _ownerName, string _ownerDOB) {
+    function bkIdentity(string _info) {
         owner = msg.sender;
-        ownerName = _ownerName;
-        ownerDOB  = _ownerDOB;
+        info = _info;
     }
 
     function updatePubKey(string _pubKey) onlyOwner() {
         pubKey = _pubKey;
+    }
+
+    function updateInfo(string _info) onlyOwner() {
+        info = _info;
     }
 
     function addProvider(address _provider) onlyOwner() {
