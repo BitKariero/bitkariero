@@ -3,7 +3,12 @@ var BK = new function() {
 
   this.ownAddress = null;
   this.identityContract = null;
-  this.requests = [];
+  
+  //list of membership SCs
+  this.myMemberships = []
+  
+  //list of reference SCs
+  this.myReferences = []
   
   //identities stores the following
   // {owner: '0xXXX', identity: '0xXXX'}  
@@ -160,6 +165,7 @@ var BK = new function() {
       this.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
       //load identities
       this.populateIDs();
+      this.populateMySCs();
     });
 
     // Crypto
@@ -258,19 +264,23 @@ var BK = new function() {
   };
 
   //scan for requests
-  this.scanTo = function(callback) {
+  this.populateMySCs = function() {
     var addRefEvent = this.w3mainContact.evAddReferenceRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
-    addRefEvent.watch(callback);
+    addRefEvent.watch((error, log) => {
+        this.logScan(error, log);
+        this.myReferences.push({sc: log.args.request, from: log.args.from});
+    });
     var addMemEvent = this.w3mainContact.evAddMembershipRequest({to: this.ownAddress}, {fromBlock:0, toBlock: 'latest'});
-    addMemEvent.watch(callback);
+    addMemEvent.watch((error, log) => {
+        this.logScan(error, log);
+        this.myMemberships.push({sc: log.args.request, from: log.args.from});
+    });
   }
 
 
-  //scan for requests
-  this.scanSentReq = function() {
-    this.scanTo(function(error, log) {
-        console.log('Block' + log.blockNumber + 'Request from' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
-    });
+  //log scan for requests
+  this.logScan = function(error, log) {
+    console.log('Block' + log.blockNumber + 'Request from' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
   }
 
   //scan for IDs
