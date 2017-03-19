@@ -10,7 +10,6 @@ import { placeholderId } from './common.jsx';
 class BitKariero extends React.Component {
   constructor() {
     super();
-    BK.init();
     this.state = {
       activeTab: 'identity',
       records: [
@@ -21,19 +20,21 @@ class BitKariero extends React.Component {
       ],
     };
 
-    this.state['identity'] = placeholderId;
+    this.onTabChange = this.onTabChange.bind(this);
+  }
 
-    if (!BK.identityContract) {
-      BK.createId(placeholderId);
-    }
+  async componentWillMount() {
+    await BK.init();
 
     if(BK.identityContract) {
-      BK.identityContract.info().then(BK.ipfs.get).then(info => {
-        this.state['identity'] = info;
+      await BK.identityContract.info().then(BK.ipfs.get).then(info => {
+        var id = JSON.parse(info);
+        this.setState({identity: id});
       });
     }
-
-    this.onTabChange = this.onTabChange.bind(this);
+    else {
+      this.setState({identity: placeholderId});
+    }
   }
 
   onTabChange(newTab) {
@@ -43,6 +44,10 @@ class BitKariero extends React.Component {
   }
 
   render () {
+    if(!this.state['identity']) {
+      return false;
+    }
+
     return (
       <div>
         <BK_Menu
