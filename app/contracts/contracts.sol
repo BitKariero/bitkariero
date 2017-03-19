@@ -29,6 +29,10 @@ contract bkIdentity {
     function updateCV(string _CV) onlyOwner() {
         CV = _CV;
     }
+    
+    function updateCV(string _CV) onlyOwner() {
+        CV = _CV;
+    }
 
     function updatePubKey(string _pubKey) onlyOwner() {
         pubKey = _pubKey;
