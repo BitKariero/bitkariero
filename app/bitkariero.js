@@ -3,16 +3,16 @@ var BK = new function() {
 
   this.ownAddress = null;
   this.identityContract = null;
-  
+
   //list of membership SCs
   this.myMemberships = []
-  
+
   //list of reference SCs
   this.myReferences = []
-  
+
   //identities stores the following
-  // {owner: '0xXXX', identity: '0xXXX'}  
-  this.identites = [];
+  // {owner: '0xXXX', identity: '0xXXX'}
+  this.identities = [];
   this.PlainReference = null;
   this.mainContract = null;
   this.w3mainContact = null;
@@ -170,7 +170,7 @@ var BK = new function() {
 
     // Crypto
     BK.crypto.init();
-    
+
   };
 
   this.requestReference = function(from) {
@@ -290,25 +290,25 @@ var BK = new function() {
       var addIDEv = this.w3mainContact.evIdentities({}, {fromBlock:0, toBlock:'latest'});
       addIDEv.watch(callback);
   }
-  
+
   //populate identities list
   this.populateIDs = function() {
       this.scanIDs( (error, log) => {
-          this.identites.push({owner: log.args.owner, identity: log.args.identity});
+          this.identities.push({owner: log.args.owner, identity: log.args.identity});
           console.log('Block' + log.blockNumber + 'owner:' + log.args.owner + ' identity:' + log.args.identity);
       });
   }
-  
+
   //returns identity SC assosiated with owner
-  //needs populated identites
+  //needs populated identities
   this.getIdentity = function(owner) {
-      return BK.identites.find((x) => {return x.owner === owner;}).identity;
+      return BK.identities.find((x) => {return x.owner === owner;}).identity;
   }
-  
+
   //returns owner assosiated with identity SC
   //needs populated identities
   this.getIdentityOwner = function(identity) {
-      return BK.identites.find((x) => {return x.identity === identity;}).owner;
+      return BK.identities.find((x) => {return x.identity === identity;}).owner;
   }
 
   /* Crypto */
