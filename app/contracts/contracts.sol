@@ -6,6 +6,7 @@ contract bkIdentity {
     address public owner;
     string public info;
     string public pubKey;
+    string public CV;
 
     mapping(address => bool) public providers;
     address[] public vouches;
@@ -23,6 +24,10 @@ contract bkIdentity {
     function bkIdentity(string _info) {
         owner = msg.sender;
         info = _info;
+    }
+    
+    function updateCV(string _CV) onlyOwner() {
+        CV = _CV;
     }
 
     function updatePubKey(string _pubKey) onlyOwner() {
