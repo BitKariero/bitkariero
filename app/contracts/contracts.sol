@@ -6,6 +6,7 @@ contract bkIdentity {
     address public owner;
     string public ownerName;
     string public ownerDOB;
+    string public pubKey;
 
     mapping(address => bool) public providers;
     address[] public vouches;
@@ -20,10 +21,14 @@ contract bkIdentity {
         _;
     }
 
-    function bkIdentity(address _owner, string _ownerName, string _ownerDOB) {
-        owner = _owner;
+    function bkIdentity(string _ownerName, string _ownerDOB) {
+        owner = msg.sender;
         ownerName = _ownerName;
         ownerDOB  = _ownerDOB;
+    }
+
+    function updatePubKey(string _pubKey) onlyOwner() {
+        pubKey = _pubKey;
     }
 
     function addProvider(address _provider) onlyOwner() {

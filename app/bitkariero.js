@@ -33,7 +33,7 @@ var BK = new function() {
             if (compiledSingle.code.includes('0x')) {
               compiledSingle.code = compiledSingle.code.slice(2);
             }
-            
+
           BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiledSingle.info.abiDefinition, code: compiledSingle.code});
         }
         typeof callback === 'function' && callback();
@@ -186,6 +186,8 @@ var BK = new function() {
   this.createId = function(fullname, dob) {
       return BK.bkIdentity.deploy([fullname, dob]).then((sc) => {
           BK.mainContract.addIdentity(sc.address);
+          BK.identityContract = sc;
+          BK.crypto.exportKey('own').then(BK.ipfs.put).then(sc.updatePubKey);
           return sc;
       });
   };
@@ -305,6 +307,28 @@ var BK = new function() {
       });
     };
 
+    this.exportKey = function(propertyValue) {
+      return crypto.keyStore.getKey('name', propertyValue).then(k => {return k.publicKey}).then(
+        pubkey => {
+          return window.crypto.subtle.exportKey('jwk', pubkey).then(JSON.stringify);
+      });
+    };
+
+    this.importKey = function(address, pubkey) {
+      if (typeof(pubkey) == 'string' || pubkey instanceof String) {
+        pubkey = JSON.parse(pubkey);
+      }
+
+      return window.crypto.subtle.importKey(
+        "jwk", pubkey,
+        {name: "RSA-OAEP", hash: {name: "SHA-256"}},
+        pubkey.ext,
+        pubkey.key_ops
+      ).then(pubkey => {
+          return crypto.keyStore.saveKey(pubkey, null, String(address));
+      });
+    }
+
     this.keyStore = new function() {
       "use strict";
       var self = this;
@@ -336,8 +360,7 @@ var BK = new function() {
                   self.db = evt.target.result;
                   if (!self.db.objectStoreNames.contains(self.objectStoreName)) {
                       var objStore = self.db.createObjectStore(self.objectStoreName, {autoIncrement: true});
-                      objStore.createIndex("name", "name", {unique: false});
-                      objStore.createIndex("spki", "spki", {unique: false});
+                      objStore.createIndex("name", "name", {unique: true});
                   }
               };
           });
@@ -355,7 +378,6 @@ var BK = new function() {
                       publicKey:  publicKey,
                       privateKey: privateKey,
                       name:       name,
-                      spki:       spki
                   };
 
                   var transaction = self.db.transaction([self.objectStoreName], "readwrite");
@@ -386,8 +408,6 @@ var BK = new function() {
                   request = objectStore.get(propertyValue);
               } else if (propertyName === "name") {
                   request = objectStore.index("name").get(propertyValue);
-              } else if (propertyName === "spki") {
-                  request = objectStore.index("spki").get(propertyValue);
               } else {
                   reject(new Error("No such property: " + propertyName));
               }
