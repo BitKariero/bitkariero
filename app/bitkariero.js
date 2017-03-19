@@ -183,13 +183,15 @@ var BK = new function() {
   };
 
   //create identityContract
-  this.createId = function(fullname, dob) {
-      return BK.bkIdentity.deploy([fullname, dob]).then((sc) => {
+  this.createId = function(info) {
+      return BK.ipfs.put(JSON.stringify(info)).then(info => {
+        BK.bkIdentity.deploy([info]).then((sc) => {
           BK.mainContract.addIdentity(sc.address);
           BK.identityContract = sc;
           BK.crypto.exportKey('own').then(BK.ipfs.put).then(sc.updatePubKey);
           return sc;
-      });
+      })
+    });
   };
 
   this.createFloatingReference = function(secret) {
