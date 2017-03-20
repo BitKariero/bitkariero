@@ -164,7 +164,7 @@ class BK_IdentityFullNew extends BK_IdentityFull {
 
     return (
       <div>
-        <Form id='create-id'>
+        <Form id='create-id' onsubmit='return false;'>
         <Header as='h2' attached='top'>
           <Grid columns={2}>
             <Grid.Column width={2} verticalAlign='middle'>
@@ -250,6 +250,7 @@ class BK_EditUpdateButton extends React.Component {
       <div>
         { !this.props.new ?
             <Button
+              type='button'
               id='bk-identity-edit'
               compact secondary floated='right'
               content='Edit'
@@ -258,12 +259,14 @@ class BK_EditUpdateButton extends React.Component {
                                :
            <div>
            <Button
+             type='button'
              id='bk-identity-update'
              compact positive floated='right'
              content='Create identity'
              onClick={this.handleClick}
            />
            <Button
+             type='button'
              id='bk-identity-cancel'
              compact negative floated='right'
              content='Cancel'
