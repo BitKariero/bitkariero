@@ -56,7 +56,7 @@ class BitKariero extends React.Component {
         />
 
         { this.state.activeTab == 'identity' &&
-          <BK_Identity identity={this.state.identity}/>
+            <BK_Identity identity={this.state.identity} new={this.state.identity == placeholderId}/>
         }
 
         { this.state.activeTab == 'records' &&

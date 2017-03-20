@@ -183,7 +183,10 @@ var BK = new function() {
           }
         }
 
-        BK.identityContract = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: BK.getIdentity(BK.ownAddress)});
+        var identityAddr = BK.getIdentity(BK.ownAddress);
+        if(identityAddr) {
+          BK.identityContract = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: identityAddr});
+        }
 
         //load identities
         BK.populateIDs();
@@ -221,6 +224,8 @@ var BK = new function() {
       if (typeof(info) != 'string' && !(info instanceof String)) {
         info = JSON.stringify(info);
       }
+
+      console.log("Creating identity: " + info);
 
       return BK.ipfs.put(info).then(info => {
         BK.bkIdentity.deploy([info]).then((sc) => {
@@ -345,13 +350,19 @@ var BK = new function() {
   //returns identity SC assosiated with owner
   //needs populated identities
   this.getIdentity = function(owner) {
-      return BK.identities.find((x) => {return x.owner === owner;}).identity;
+      var x = BK.identities.find((x) => {return x.owner === owner;})
+      if (x) {
+        return x.identity;
+      }
   }
 
   //returns owner assosiated with identity SC
   //needs populated identities
   this.getIdentityOwner = function(identity) {
-      return BK.identities.find((x) => {return x.identity === identity;}).owner;
+      var x = BK.identities.find((x) => {return x.identity === identity;})
+      if (x) {
+        return x.owner;
+      }
   }
 
   /* Crypto */
