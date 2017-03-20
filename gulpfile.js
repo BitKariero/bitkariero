@@ -1,6 +1,5 @@
 // gulp
 var gulp = require('gulp');
-var uglify = require('gulp-uglify');
 var pump = require('pump');
 var connect = require('gulp-connect');
 var cors = require('cors');
@@ -23,7 +22,6 @@ gulp.task('webpack:build', function(cb) {
   pump([
     gulp.src('app'),
     webpack(WebpackConfig),
-    uglify(),
     gulp.dest('dist/')
   ], cb);
 });
