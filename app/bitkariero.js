@@ -25,31 +25,34 @@ var BK = new function() {
 
   /* Contracts */
   this.loadContract = function(contractNames, url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.send();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        var code = xhr.responseText;
-        var compiled = web3.eth.compile.solidity(code);
-        for (var i = 0; i < contractNames.length; i++) {
-            /*<stdin> is needed for solc 0.4.9, slice(2) is needed since 0x is appended elsewhere */
-            var compiledSingle = null;
-            if ('<stdin>:' + contractNames[i] in compiled) {
-                compiledSingle = compiled['<stdin>:' + contractNames[i]];
-            } else {
-                compiledSingle = compiled[contractNames[i]];
-            }
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, true);
+      xhr.send();
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          var code = xhr.responseText;
+          var compiled = web3.eth.compile.solidity(code);
+          for (var i = 0; i < contractNames.length; i++) {
+              /*<stdin> is needed for solc 0.4.9, slice(2) is needed since 0x is appended elsewhere */
+              var compiledSingle = null;
+              if ('<stdin>:' + contractNames[i] in compiled) {
+                  compiledSingle = compiled['<stdin>:' + contractNames[i]];
+              } else {
+                  compiledSingle = compiled[contractNames[i]];
+              }
 
-            if (compiledSingle.code.includes('0x')) {
-              compiledSingle.code = compiledSingle.code.slice(2);
-            }
+              if (compiledSingle.code.includes('0x')) {
+                compiledSingle.code = compiledSingle.code.slice(2);
+              }
 
-          BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiledSingle.info.abiDefinition, code: compiledSingle.code});
+            BK[contractNames[i]] = new EmbarkJS.Contract({abi: compiledSingle.info.abiDefinition, code: compiledSingle.code});
+          }
+          typeof callback === 'function' && callback();
+          resolve(BK[contractNames[i]]);
         }
-        typeof callback === 'function' && callback();
-      }
-    };
+      };
+    });
   };
 
   /* IPFS */
@@ -158,33 +161,40 @@ var BK = new function() {
 
   /* Initialize */
   this.init = function(addr) {
-    this.ownAddress = addr ? addr : web3.eth.accounts[0];
-    this.identityContract = null;
-    this.requests = [];
-    this.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkFloatingReference"], "contracts/contracts.sol", null);
-    this.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
-      this.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
-      this.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
+    return new Promise(function (resolve, reject) {
+      BK.ownAddress = addr ? addr : web3.eth.accounts[0];
+      BK.identityContract = null;
+      BK.requests = [];
+      resolve(BK.ownAddress);
+    }).then( () => {
+      return BK.loadContract(["bkIdentity", "bkReference", "bkMembership", "bkFloatingReference"], "contracts/contracts.sol", null);
+    }).then( () => {
+      return BK.loadContract(["bkMain"], "contracts/bkMain.sol", () => {
+        BK.mainContract = new EmbarkJS.Contract({abi: BK.bkMain.abi, address: BkMainContractAddress});
+        BK.w3mainContact = web3.eth.contract(BK.bkMain.abi).at(BkMainContractAddress);
 
-      // Load results from localStorage, if exists
-      var _identities = localStorage.getItem('identities');
-      var lastScannedBlock = localStorage.getItem('lastScannedBlock');
-      if (_identities != null && _identities != '') {
-        this.identities = JSON.parse(_identities);
-        if (lastScannedBlock != null && lastScannedBlock != '') {
-          this.startingBlock = parseInt(lastScannedBlock, 10);
+        // Load results from localStorage, if exists
+        var _identities = localStorage.getItem('identities');
+        var lastScannedBlock = localStorage.getItem('lastScannedBlock');
+        if (_identities != null && _identities != '') {
+          BK.identities = JSON.parse(_identities);
+          if (lastScannedBlock != null && lastScannedBlock != '') {
+            BK.startingBlock = parseInt(lastScannedBlock, 10);
+          }
         }
-      }
 
-      //load identities
-      this.populateIDs();
-      this.populateMySCs();
+        var identityAddr = BK.getIdentity(BK.ownAddress);
+        if(identityAddr) {
+          BK.identityContract = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: identityAddr});
+        }
 
+        //load identities
+        BK.populateIDs();
+        BK.populateMySCs();
+      });
+    }).then( () => {
+      BK.crypto.init();
     });
-
-    // Crypto
-    BK.crypto.init();
-
   };
 
   this.requestReference = function(from) {
@@ -211,7 +221,13 @@ var BK = new function() {
 
   //create identityContract
   this.createId = function(info) {
-      return BK.ipfs.put(JSON.stringify(info)).then(info => {
+      if (typeof(info) != 'string' && !(info instanceof String)) {
+        info = JSON.stringify(info);
+      }
+
+      console.log("Creating identity: " + info);
+
+      return BK.ipfs.put(info).then(info => {
         BK.bkIdentity.deploy([info]).then((sc) => {
           BK.mainContract.addIdentity(sc.address);
           BK.identityContract = sc;
@@ -345,13 +361,19 @@ var BK = new function() {
   //returns identity SC assosiated with owner
   //needs populated identities
   this.getIdentity = function(owner) {
-      return BK.identities.find((x) => {return x.owner === owner;}).identity;
+      var x = BK.identities.find((x) => {return x.owner === owner;})
+      if (x) {
+        return x.identity;
+      }
   }
 
   //returns owner assosiated with identity SC
   //needs populated identities
   this.getIdentityOwner = function(identity) {
-      return BK.identities.find((x) => {return x.identity === identity;}).owner;
+      var x = BK.identities.find((x) => {return x.identity === identity;})
+      if (x) {
+        return x.owner;
+      }
   }
 
   /* Crypto */
