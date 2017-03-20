@@ -220,6 +220,17 @@ var BK = new function() {
       })
     });
   };
+  
+  //create CV
+  //pass a list of reference SCs as references
+  //and plain text as CVtext
+  this.createCV = function(references, CVtext) {
+      var CV = {owner: BK.ownAddress, references: references, text: CVtext};
+      return this.ipfs.put(JSON.stringify(CV)).then((hash)=>{
+          console.log("IPFS hash:" + hash);
+          return this.identityContract.updateCV(hash);
+      });
+  }
 
   this.createFloatingReference = function(secret) {
       return this.requestRecord(this.bkFloatingReference, web3.sha3(secret));
