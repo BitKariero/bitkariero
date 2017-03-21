@@ -329,8 +329,11 @@ var BK = new function() {
         console.log("owner: " + owner);
         if(owner) {
           var owner_id = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: BK.getIdentity(owner)});
-          return owner_id.pubKey().then(BK.ipfs.get).then(pubkey => {
-            BK.crypto.importKey(owner, pubkey);
+          return owner_id.pubKey().then(BK.ipfs.get).then(async pubkey => {
+            try {
+              await BK.crypto.importKey(owner, pubkey);
+            } catch(err) {;}
+            console.log("Imported pubkey");
 
             return BK.crypto.keyStore.getKey('name', owner).then(k => {return k.publicKey}).then(
               pk => {
