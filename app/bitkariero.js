@@ -1,7 +1,7 @@
 var BK = new function() {
   var BK = this;
 
-  var startingBlock = 0;
+  this.startingBlock = 0;
   var BK_ENCRYPTED_MIN_SIZE = 290;
 
   this.ownAddress = null;
@@ -187,7 +187,8 @@ var BK = new function() {
         if (_identities != null && _identities != '') {
           BK.identities = JSON.parse(_identities);
           if (lastScannedBlock != null && lastScannedBlock != '') {
-            BK.startingBlock = parseInt(lastScannedBlock, 10);
+              ;
+           // BK.startingBlock = parseInt(lastScannedBlock, 10);
           }
         }
 

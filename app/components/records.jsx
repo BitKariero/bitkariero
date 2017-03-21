@@ -1,17 +1,37 @@
 import React from 'react';
 import {render} from 'react-dom';
-import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label } from 'semantic-ui-react';
+import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Checkbox } from 'semantic-ui-react';
 
 export default class BK_Records extends React.Component {
   constructor(props) {
     super(props);
+    this.selectedReferences = new Set();
+    this.toggleCheckbox = this.toggleCheckbox.bind(this);
+    this.createCV = this.createCV.bind(this);
   }
+  
+  toggleCheckbox(event) {
+    if(this.selectedReferences.has(event.target.name)) {
+        this.selectedReferences.delete(event.target.name);
+    } else {
+        this.selectedReferences.add(target.target.name);
+    }
+  }
+  
+  createCV() {
+    console.log(this.selectedReferences);
+    BK.createCV(Array.from(this.selectedReferences), 'SUPER AMAZING CV');
+  }
+  
+  
 
   render() {
     const { records } = this.props;
     console.log(records);
 
+     var parent = this;
     return (
+       
       <div>
       <Header as='h2' icon textAlign='center'>
      <Icon name='check circle' circular />
@@ -19,12 +39,13 @@ export default class BK_Records extends React.Component {
        Verified Requests
      </Header.Content>
      </Header>
-        { records.map(function(record, i) {
+        { 
+        records.map(function(record, i) {
             return (
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Image src={'img/' + i + '.png'} shape='circular' size='small'/>
+                    <Checkbox name={record.sc} label='add to cv' onChange={parent.toggleCheckbox}/>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
@@ -76,7 +97,11 @@ export default class BK_Records extends React.Component {
               </div>
             );
           })}
+          <Button label='Create CV' onclick={parent.createCV} />
       </div>
-    );
+      
+      
+    );    
   }
+  
 }
