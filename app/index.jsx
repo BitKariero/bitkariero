@@ -12,35 +12,66 @@ class BitKariero extends React.Component {
     super();
     this.state = {
       activeTab: 'identity',
-      records: [
-        {id: 'PLACEHOLDER', location: 'London, United Kingdom', company: 'Google Inc', recordType: 'Reference', role: 'Chief Software Engineer - Tushar Roy', date: '24/06/15', time: 'UTC 13:23', content: 'I would like to recommend Mr. Happy Singh as a candidate for a position with your organization. In his position as Junior Software Developer, Happy was employed in our office from June 2014 - December 2014. Mr. Happy did an excellent job in this position and was an asset to our organization during her tenure with the office. '}
-      ],
       requests: [
         {id: 'PH', location: '77 Massachusetts Ave, Cambridge, MA 02139, USA', company: 'Massachusetts Institute of Technology', recordType: 'MSc Computer Science', role: 'Department of Admissions', date: '20/07/17', time: 'UTC 15:43'}
       ],
     };
 
     this.onTabChange = this.onTabChange.bind(this);
+    this.updateState = this.updateState.bind(this);
   }
 
   async componentWillMount() {
     await BK.init();
+    await this.updateState();
+  }
 
+  async updateState() {
+    console.log("Updating state.");
+    // Identity
+    var id = placeholderId;
     if(BK.identityContract) {
       await BK.identityContract.info().then(BK.ipfs.get).then(info => {
-        var id = JSON.parse(info);
+        id = JSON.parse(info);
         this.setState({identity: id});
       });
     }
-    else {
-      this.setState({identity: placeholderId});
+    this.setState({identity: id});
+
+    // References
+    console.log(BK.myReferences);
+    var records = [];
+    for (var i = 0, len = BK.myReferences.length; i < len; i++) {
+      var ref = await BK.getReference(BK.myReferences[i].sc);
+      var record = {};
+      var parsed;
+
+      try {
+        parsed = await JSON.parse(ref);
+      }
+      catch (err) {
+        ;
+      }
+
+      if (parsed && typeof parsed != 'string') {
+        record = parsed
+      }
+      else {
+        record.content = ref;
+      }
+
+      records.push(record);
     }
+
+    this.setState({records: records});
   }
 
   onTabChange(newTab) {
     this.setState({
       activeTab: newTab
     });
+
+    this.updateState();
   }
 
   render () {

@@ -6,6 +6,7 @@ export default class BK_Records extends React.Component {
   constructor(props) {
     super(props);
   }
+
   render() {
     const { records } = this.props;
     console.log(records);
@@ -23,29 +24,29 @@ export default class BK_Records extends React.Component {
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Image src={'img/' + record.id + '.png'} shape='circular' size='small'/>
+                    <Image src={'img/' + i + '.png'} shape='circular' size='small'/>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
                         <Grid.Row>
                           <Grid.Column floated='left' width={10}>
-                            <Header as='h1'>{record.company}</Header>
-                            <Header as='h2'><i>{record.role}</i></Header>
-                            <Header as='h3'><i>{record.location}</i></Header>
+                            <Header as='h1'>{record.company || 'Company'}</Header>
+                            <Header as='h2'><i>{record.role || 'Role'}</i></Header>
+                            <Header as='h3'><i>{record.location || 'Location'}</i></Header>
                           </Grid.Column>
                           <Grid.Column floated='right' width={3}>
                             <Container textAlign='left'>
                               <Label as='a'>
                                    <Icon name='calendar' />Date
                              </Label>
-                             {"     " + record.date}
+                             {"     " + record.date || 'Date'}
                            </Container>
                            <br/>
                            <Container textAlign='left'>
                              <Label as='a'>
                                   <Icon name='clock' />Time
                             </Label>
-                            {"     " + record.time}
+                            {"     " + record.time || 'Time'}
                            </Container>
                           </Grid.Column>
                         </Grid.Row>
@@ -58,11 +59,11 @@ export default class BK_Records extends React.Component {
                               <Accordion>
                                 <Accordion.Title>
                                   <Icon name='dropdown' />
-                                  See full {record.recordType}
+                                  See full {record.recordType || 'Record'}
                                 </Accordion.Title>
                                 <Accordion.Content>
                                   <p>
-                                    {record.content}
+                                    {record.content || 'Content'}
                                   </p>
                                 </Accordion.Content>
                                 </Accordion>

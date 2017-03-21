@@ -84,14 +84,14 @@ var BK = new function() {
 
     this.b64StringToBlob = function(string) {
       function _base64ToArrayBuffer(base64) {
-        var binary_string =  window.atob(base64);
-        var len = binary_string.length;
-        var bytes = new Uint8Array(len);
+         var binary_string =  window.atob(base64);
+         var len = binary_string.length;
+         var bytes = new Uint8Array(len);
 
-        for (var i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
+         for (var i = 0; i < len; i++) {
+             bytes[i] = binary_string.charCodeAt(i);
+         }
+         return bytes.buffer;
       };
 
       return new Promise(function(resolve, reject) {
@@ -299,6 +299,10 @@ var BK = new function() {
 
   //upload reference content to IPFS and add hash to SC
   this.provideReference = function(refSCAddr, str) {
+    if (!(typeof str == 'string' || str instanceof String)) {
+      str = JSON.stringify(str);
+    }
+
     //upload to ipfs
     return this.ipfs.put(str).then( (hash) => {
         //get SC
@@ -315,11 +319,11 @@ var BK = new function() {
     var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
     return refSC.reference().then((hash) => {
         console.log("IPFS hash:" + hash);
-        return BK.ipfs.get(hash).then( (data) => {
+        return BK.ipfs.get(hash).then( async (data) => {
             console.log("Data: " + data);
             var decoded;
             try {
-              decoded = BK.ipfs.b64StringToBlob(data).then(BK.crypto.decrypt);
+              decoded = await BK.ipfs.b64StringToBlob(data).then(BK.crypto.decrypt);
             }
             catch(err) {
               decoded = data;
