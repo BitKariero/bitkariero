@@ -1,7 +1,7 @@
 var BK = new function() {
   var BK = this;
 
-  var startingBlock = 700000;
+  var startingBlock = 0;
   var BK_ENCRYPTED_MIN_SIZE = 290;
 
   this.ownAddress = null;
@@ -186,7 +186,7 @@ var BK = new function() {
           if (lastScannedBlock != null && lastScannedBlock != '') {
             BK.startingBlock = parseInt(lastScannedBlock, 10);
           }
-        }
+        } 
 
         var identityAddr = BK.getIdentity(BK.ownAddress);
         if(identityAddr) {
@@ -196,6 +196,9 @@ var BK = new function() {
         //load identities
         BK.populateIDs();
         BK.populateMySCs();
+        
+        //load CVstr
+        BK.populateCVs();
       });
     }).then( () => {
       BK.crypto.init();
@@ -230,7 +233,7 @@ var BK = new function() {
         info = JSON.stringify(info);
       }
 
-      console.log("Creating identity: " + info);
+      console.log("createid -> info -> " + info);
 
       return BK.ipfs.put(info).then(info => {
         console.log('identity -> ipfs ->', info);
@@ -244,32 +247,49 @@ var BK = new function() {
     });
   };
   
+  
   //fill CV list
   //parse identities list and get names and CV
   //if CV exists get info
   //if references exist in CV get reference info
   this.populateCVs = function() {
       this.identities.map(async (x) => {
+          console.log('populateCV -> x ->', x);
           var identity = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address:x.identity});
-          var info = await identity.info();
+          var infoHash = await identity.info();
+          console.log('populateCVs -> infohash ->', infoHash);
+          var info = await this.ipfs.get(infoHash);
+          info = JSON.parse(info);
           var CVhash = await identity.CV();
+          console.log('populateCVs -> cvhash ->', CVhash);
           var text = "no cv";
           var references = [];
           if(CVhash.length > 0) {
               var CVstr = await this.ipfs.get(CVhash);
               var CV = JSON.parse(CVstr);
               text = CV.text;
-              references = CV.references.map(async (x) => {
-                    var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: x});
+              references = await Promise.all(CV.references.map(async (x) => {
+                    var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: String(x)});
                     var hash = await refSC.reference();
                     var content = await this.ipfs.get(hash);
-                    var fromSCaddr = await refSC.from();
-                    return {from: fromSCaddr, content: content};
-              });
+                    var fromSCaddr = await refSC.provider();
+                    var fromID = await this.getIdentity(fromSCaddr);
+                    var xInfo = await this.getIdentityInfo(fromID);
+                    xInfo = JSON.parse(xInfo);
+                    return {from: xInfo, content: content};
+              }));
           }
           this.allCVs.push({identity: x.identity, name: info, text: text, references: references});
       });
   }
+  
+  this.getIdentityInfo = async function(_identity) {
+    var identity = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address:_identity});
+    var infoHash = await identity.info();
+    var info = await this.ipfs.get(infoHash);
+    return info;
+  }
+      
   
   //create CV
   //pass a list of reference SCs as references

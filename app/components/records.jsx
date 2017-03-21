@@ -1,11 +1,29 @@
 import React from 'react';
 import {render} from 'react-dom';
-import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label } from 'semantic-ui-react';
+import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Checkbox } from 'semantic-ui-react';
 
 export default class BK_Records extends React.Component {
   constructor(props) {
     super(props);
+    this.selectedReferences = new Set();
+    this.toggleCheckbox = this.toggleCheckbox.bind(this);
+    this.createCV = this.createCV.bind(this);
   }
+  
+  toggleCheckbox(event) {
+    if(this.selectedReferences.has(target.name)) {
+        this.selectedReferences.delete(target.name);
+    } else {
+        this.selectedReferences.add(target.name);
+    }
+  }
+  
+  createCV() {
+    console.log(this.selectedReferences);
+    BK.createCV(Array.from(this.selectedReferences), 'SUPER AMAZING CV');
+  }
+  
+  
 
   render() {
     const { records } = this.props;
@@ -24,7 +42,7 @@ export default class BK_Records extends React.Component {
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Image src={'img/' + i + '.png'} shape='circular' size='small'/>
+                    <Checkbox name={record.sc} label='add to cv' onChange={this.toggleCheckbox}/>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
@@ -76,7 +94,11 @@ export default class BK_Records extends React.Component {
               </div>
             );
           })}
+          <Button label='Create CV' onclick={this.createCV} />
       </div>
-    );
+      
+      
+    );    
   }
+  
 }
