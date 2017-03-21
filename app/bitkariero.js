@@ -351,12 +351,12 @@ var BK = new function() {
 
   //scan for requests
   this.populateMySCs = function() {
-    var addRefEvent = this.w3mainContact.evAddReferenceRequest({to: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
+    var addRefEvent = this.w3mainContact.evAddReferenceRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addRefEvent.watch((error, log) => {
         this.logScan(error, log);
         this.myReferences.push({sc: log.args.request, from: log.args.from});
     });
-    var addMemEvent = this.w3mainContact.evAddMembershipRequest({to: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
+    var addMemEvent = this.w3mainContact.evAddMembershipRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addMemEvent.watch((error, log) => {
         this.logScan(error, log);
         this.myMemberships.push({sc: log.args.request, from: log.args.from});
