@@ -56,12 +56,9 @@ class BitKariero extends React.Component {
         } else { record.content = ref; }
 
         records.push(record);
-      }
 
-      this.setState({records: records});
-    }
-    catch (err) {
-      ;
+        this.setState({records: records});
+      } catch (err) {;}
     }
   }
 
