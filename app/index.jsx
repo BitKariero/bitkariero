@@ -41,24 +41,26 @@ class BitKariero extends React.Component {
 
   async updateReferences() {
     var records = [];
+    this.setState({records: records});
+
     for (var i = 0, len = BK.myReferences.length; i < len; i++) {
-      try {
-        var ref = await BK.getReference(BK.myReferences[i].sc);
+      var ref = await BK.getReference(BK.myReferences[i].sc);
+      console.log("updateReference – read ref: " + ref);
+      if (ref) {
         var record = {};
-        var parsed;
+        var parsed = null;
 
         try {
-          parsed = await JSON.parse(ref);
-        } catch (err) {;}
+          parsed = JSON.parse(ref);
+        } catch (err) {parsed = null;}
 
         if (parsed && typeof parsed != 'string') {
           record = parsed
         } else { record.content = ref; }
 
         records.push(record);
-
         this.setState({records: records});
-      } catch (err) {;}
+      }
     }
   }
 
@@ -66,6 +68,7 @@ class BitKariero extends React.Component {
     console.log("Updating state.");
     await this.updateIdentity();
     await this.updateReferences();
+    console.log(this.state.records);
   }
 
   onTabChange(newTab) {
