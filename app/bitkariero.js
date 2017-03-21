@@ -1,7 +1,7 @@
 var BK = new function() {
   var BK = this;
 
-  var startingBlock = 700000;
+  var startingBlock = 0;
   var BK_ENCRYPTED_MIN_SIZE = 290;
 
   this.ownAddress = null;
@@ -10,9 +10,12 @@ var BK = new function() {
   //list of membership SCs
   this.myMemberships = [];
 
-  //list of reference SCs
+  //list of reference SCs (records)
   this.myReferences = [];
-  
+
+  // incoming requests
+  this.incomingRequests = [];
+
   //list of all CVs
   //{identity: '0x...', name: 'Bob', text: 'amazing', references: [ {from: 'Alice', content: 'amazing ref'} ] }
   this.allCVs = [];
@@ -195,7 +198,8 @@ var BK = new function() {
 
         //load identities
         BK.populateIDs();
-        BK.populateMySCs();
+        BK.populateSCs({from: BK.ownAddress}, this.myReferences);
+        BK.populateSCs({to: BK.ownAddress}, this.incomingRequests);
       });
     }).then( () => {
       BK.crypto.init();
@@ -243,7 +247,7 @@ var BK = new function() {
       })
     });
   };
-  
+
   //fill CV list
   //parse identities list and get names and CV
   //if CV exists get info
@@ -270,7 +274,7 @@ var BK = new function() {
           this.allCVs.push({identity: x.identity, name: info, text: text, references: references});
       });
   }
-  
+
   //create CV
   //pass a list of reference SCs as references
   //and plain text as CVtext
@@ -394,23 +398,24 @@ var BK = new function() {
   };
 
   //scan for requests
-  this.populateMySCs = function() {
-    var addRefEvent = this.w3mainContact.evAddReferenceRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
+  this.populateSCs = function(filter, store) {
+    var addRefEvent = this.w3mainContact.evAddReferenceRequest(filter, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addRefEvent.watch((error, log) => {
         this.logScan(error, log);
-        this.myReferences.push({sc: log.args.request, from: log.args.from});
+        store.push({sc: log.args.request, from: log.args.from});
     });
-    var addMemEvent = this.w3mainContact.evAddMembershipRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
-    addMemEvent.watch((error, log) => {
-        this.logScan(error, log);
-        this.myMemberships.push({sc: log.args.request, from: log.args.from});
-    });
+
+    // var addMemEvent = this.w3mainContact.evAddMembershipRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
+    // addMemEvent.watch((error, log) => {
+    //     this.logScan(error, log);
+    //     this.myMemberships.push({sc: log.args.request, from: log.args.from});
+    // });
   }
 
 
   //log scan for requests
   this.logScan = function(error, log) {
-    console.log('Block' + log.blockNumber + 'Request from' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
+    console.log('Block' + log.blockNumber + 'Request from ' + log.args.from + ' to ' + log.args.to + ' request ' + log.args.request);
   }
 
   //scan for IDs

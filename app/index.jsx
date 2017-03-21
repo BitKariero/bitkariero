@@ -13,15 +13,13 @@ class BitKariero extends React.Component {
     super();
     this.state = {
       activeTab: 'identity',
-      requests: [
-        {id: 'PH', location: '77 Massachusetts Ave, Cambridge, MA 02139, USA', company: 'Massachusetts Institute of Technology', recordType: 'MSc Computer Science', role: 'Department of Admissions', date: '20/07/17', time: 'UTC 15:43'}
-      ],
     };
 
     this.onTabChange = this.onTabChange.bind(this);
     this.updateState = this.updateState.bind(this);
     this.updateIdentity = this.updateIdentity.bind(this);
     this.updateReferences = this.updateReferences.bind(this);
+    this.updateRequests = this.updateRequests.bind(this);
   }
 
   async componentWillMount() {
@@ -60,15 +58,30 @@ class BitKariero extends React.Component {
         } else { record.content = ref; }
 
         records.push(record);
-        this.setState({records: records});
       }
     }
+    this.setState({records: records});
+  }
+
+  async updateRequests() {
+    var requests = [];
+    this.setState({requests: requests});
+
+    for (var i = 0, len = BK.incomingRequests.length; i < len; i++) {
+      var request = BK.incomingRequests[i];
+      request['type'] = 'Reference';
+      requests.push(request);
+    }
+
+    this.setState({requests: requests});
   }
 
   async updateState() {
     console.log("Updating state.");
     await this.updateIdentity();
     await this.updateReferences();
+    await this.updateRequests();
+    console.log("Records ->");
     console.log(this.state.records);
   }
 

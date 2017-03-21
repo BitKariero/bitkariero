@@ -16,7 +16,7 @@ export default class BK_Requests extends React.Component {
       <Header as='h2' icon textAlign='center'>
      <Icon name='wait' circular />
      <Header.Content>
-        Pending Requests
+        Incoming Requests
      </Header.Content>
      </Header>
         { requests.map(function(object, i) {
@@ -29,33 +29,31 @@ export default class BK_Requests extends React.Component {
                   <Grid.Column width={13}>
                       <Grid>
                         <Grid.Row>
-                          <Grid.Column floated='left' width={10}>
-                            <Header as='h1'>{object.company}</Header>
-                            <Header as='h2'><i>{object.role}</i></Header>
-                            <Header as='h3'><i>{object.location}</i></Header>
-                          </Grid.Column>
-                          <Grid.Column floated='right' width={3}>
-                            <Container textAlign='left'>
-                              <Label as='a'>
-                                   <Icon name='calendar' />Date
-                             </Label>
-                             {"     " + object.date}
-                           </Container>
-                           <br/>
-                           <Container textAlign='left'>
-                             <Label as='a'>
-                                  <Icon name='clock' />Time
-                            </Label>
-                            {"     " + object.time}
-                           </Container>
-                          </Grid.Column>
-                        </Grid.Row>
+                          <Grid.Column floated='left' width={13}>
+                            <Header as='h2'>Request</Header>
 
-                        <Grid.Row>
-                          <Grid.Column floated='left' width={10}>
-                            <Container textAlign='justified'>
-                              <b>{object.recordType}</b>
-                            </Container>
+                            <Grid.Row>
+                            <Label as='a'>
+                                 <Icon name='certificate' />Address
+                           </Label>
+                           <span>{object.sc}</span>
+                           </Grid.Row>
+
+
+                            <Grid.Row>
+                            <Label as='a'>
+                                 <Icon name='angle double down' />From
+                           </Label>
+                           <span>{object.from}</span>
+                           </Grid.Row>
+
+                           <Grid.Row>
+                           <Label as='a'>
+                                <Icon name='file outline' />Type
+                          </Label>
+                          <span>{object.type}</span>
+                          </Grid.Row>
+
                           </Grid.Column>
                         </Grid.Row>
                       </Grid>
