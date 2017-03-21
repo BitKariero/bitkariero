@@ -19,6 +19,8 @@ class BitKariero extends React.Component {
 
     this.onTabChange = this.onTabChange.bind(this);
     this.updateState = this.updateState.bind(this);
+    this.updateIdentity = this.updateIdentity.bind(this);
+    this.updateReferences = this.updateReferences.bind(this);
   }
 
   async componentWillMount() {
@@ -26,9 +28,7 @@ class BitKariero extends React.Component {
     await this.updateState();
   }
 
-  async updateState() {
-    console.log("Updating state.");
-    // Identity
+  async updateIdentity() {
     var id = placeholderId;
     if(BK.identityContract) {
       await BK.identityContract.info().then(BK.ipfs.get).then(info => {
@@ -37,33 +37,38 @@ class BitKariero extends React.Component {
       });
     }
     this.setState({identity: id});
+  }
 
-    // References
-    console.log(BK.myReferences);
+  async updateReferences() {
     var records = [];
     for (var i = 0, len = BK.myReferences.length; i < len; i++) {
-      var ref = await BK.getReference(BK.myReferences[i].sc);
-      var record = {};
-      var parsed;
-
       try {
-        parsed = await JSON.parse(ref);
-      }
-      catch (err) {
-        ;
+        var ref = await BK.getReference(BK.myReferences[i].sc);
+        var record = {};
+        var parsed;
+
+        try {
+          parsed = await JSON.parse(ref);
+        } catch (err) {;}
+
+        if (parsed && typeof parsed != 'string') {
+          record = parsed
+        } else { record.content = ref; }
+
+        records.push(record);
       }
 
-      if (parsed && typeof parsed != 'string') {
-        record = parsed
-      }
-      else {
-        record.content = ref;
-      }
-
-      records.push(record);
+      this.setState({records: records});
     }
+    catch (err) {
+      ;
+    }
+  }
 
-    this.setState({records: records});
+  async updateState() {
+    console.log("Updating state.");
+    await this.updateIdentity();
+    await this.updateReferences();
   }
 
   onTabChange(newTab) {
