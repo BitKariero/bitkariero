@@ -88,14 +88,14 @@ var BK = new function() {
 
     this.b64StringToBlob = function(string) {
       function _base64ToArrayBuffer(base64) {
-        var binary_string =  window.atob(base64);
-        var len = binary_string.length;
-        var bytes = new Uint8Array(len);
+         var binary_string =  window.atob(base64);
+         var len = binary_string.length;
+         var bytes = new Uint8Array(len);
 
-        for (var i = 0; i < len; i++) {
-            bytes[i] = binary_string.charCodeAt(i);
-        }
-        return bytes.buffer;
+         for (var i = 0; i < len; i++) {
+             bytes[i] = binary_string.charCodeAt(i);
+         }
+         return bytes.buffer;
       };
 
       return new Promise(function(resolve, reject) {
@@ -213,7 +213,7 @@ var BK = new function() {
     return type.deploy([arg]).then(function(sc) {
       console.log("Deployed, now adding to mainBK " + sc.address);
       if (evFunc) {
-        evFunc(from, sc.address);
+        evFunc(arg, sc.address);
       }
       return sc;
     }).then(function(sc) {
@@ -315,8 +315,36 @@ var BK = new function() {
     memSC.revoke();
   };
 
+  this.provideEncryptedReference = function(refSCAddr, str) {
+    return new Promise(function (resolve, reject) {
+      var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
+      return refSC.owner().then(owner => {
+        console.log("owner: " + owner);
+        if(owner) {
+          var owner_id = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: BK.getIdentity(owner)});
+          return owner_id.pubKey().then(BK.ipfs.get).then(pubkey => {
+            BK.crypto.importKey(owner, pubkey);
+
+            return BK.crypto.keyStore.getKey('name', owner).then(k => {return k.publicKey}).then(
+              pk => {
+              return BK.crypto.encrypt(str, pk).then(enc => {
+                console.log("enc: " + enc);
+                BK.provideReference(refSCAddr, enc);
+                resolve(null);
+              });
+            });
+          });
+        }
+      });
+    });
+  };
+
   //upload reference content to IPFS and add hash to SC
   this.provideReference = function(refSCAddr, str) {
+    if (!(typeof str == 'string' || str instanceof String)) {
+      str = JSON.stringify(str);
+    }
+
     //upload to ipfs
     return this.ipfs.put(str).then( (hash) => {
         //get SC
@@ -327,14 +355,27 @@ var BK = new function() {
   };
 
   this.getReference = function(refSCAddr) {
+    // try to decrypt it
+    // if that fails, return it as is
+
     var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
     return refSC.reference().then((hash) => {
         console.log("IPFS hash:" + hash);
-        return this.ipfs.get(hash).then( (data) => {
-            console.log("Data:" + data);
-            return data;
-        });
-    } );
+        return BK.ipfs.get(hash).then( async (data) => {
+            console.log("Data: " + data);
+            var decoded;
+            try {
+              decoded = await BK.ipfs.b64StringToBlob(data).then(BK.crypto.decrypt);
+            }
+            catch(err) {
+              decoded = data;
+            }
+            return decoded;
+          }).then(data => {
+              console.log("Data:" + data);
+              return data;
+          });
+    });
   };
 
   //scan for requests

@@ -25,10 +25,10 @@ export default class BK_RequestForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    this.props.onChange();
     BK.requestReference(this.state.addrValue).then((sc) => {
         console.log("Submitted at " + sc.address);
     });
-
   }
 
   render() {
@@ -36,11 +36,12 @@ export default class BK_RequestForm extends React.Component {
       <Form onSubmit={this.handleSubmit}>
         <Form.Field>
           <label>Record type: </label>
-          <Dropdown placeholder='Record type' fluid selection options={recordTypes} />
+          <Dropdown name="recordType" placeholder='Record type' fluid selection options={recordTypes} />
         </Form.Field>
         <Form.Field>
           <label icon='asterisk'>Provided by:</label>
           <Input
+          name="addr"
           type="text"
           value={this.state.addrValue}
           onChange={this.handleChange}
