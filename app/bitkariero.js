@@ -2,6 +2,7 @@ var BK = new function() {
   var BK = this;
 
   var startingBlock = 700000;
+  var BK_ENCRYPTED_MIN_SIZE = 290;
 
   this.ownAddress = null;
   this.identityContract = null;
@@ -329,8 +330,10 @@ var BK = new function() {
 
             return BK.crypto.keyStore.getKey('name', owner).then(k => {return k.publicKey}).then(
               pk => {
-              return BK.crypto.encrypt(str, pk).then(enc => {
-                console.log("enc: " + enc);
+              console.log(str);
+              return BK.crypto.encrypt(str, pk).then(async enc => {
+                enc = await BK.ipfs.blobToB64String(enc);
+                console.log(enc);
                 BK.provideReference(refSCAddr, enc);
                 resolve(null);
               });
@@ -363,31 +366,41 @@ var BK = new function() {
     var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: refSCAddr});
     return refSC.reference().then((hash) => {
         console.log("IPFS hash:" + hash);
-        return BK.ipfs.get(hash).then( async (data) => {
-            console.log("Data: " + data);
-            var decoded;
-            try {
-              decoded = await BK.ipfs.b64StringToBlob(data).then(BK.crypto.decrypt);
-            }
-            catch(err) {
-              decoded = data;
-            }
-            return decoded;
-          }).then(data => {
-              console.log("Data:" + data);
-              return data;
-          });
+
+        if (hash != "") {
+          return BK.ipfs.get(hash).then( async (data) => {
+              console.log("Data: " + data);
+              var decoded;
+
+              try {
+                decoded = await BK.ipfs.b64StringToBlob(data);
+              } catch(err) {;}
+
+              console.log(decoded);
+              if (decoded && decoded != "" && decoded.size >= BK_ENCRYPTED_MIN_SIZE) {
+                decoded = await BK.crypto.decrypt(decoded);
+              } else {
+                decoded = data;
+              }
+
+              return decoded;
+            }).then(data => {
+                console.log("(Decrypted) data: " + data);
+                return data;
+            });
+        }
+        else { return null; }
     });
   };
 
   //scan for requests
   this.populateMySCs = function() {
-    var addRefEvent = this.w3mainContact.evAddReferenceRequest({to: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
+    var addRefEvent = this.w3mainContact.evAddReferenceRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addRefEvent.watch((error, log) => {
         this.logScan(error, log);
         this.myReferences.push({sc: log.args.request, from: log.args.from});
     });
-    var addMemEvent = this.w3mainContact.evAddMembershipRequest({to: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
+    var addMemEvent = this.w3mainContact.evAddMembershipRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addMemEvent.watch((error, log) => {
         this.logScan(error, log);
         this.myMemberships.push({sc: log.args.request, from: log.args.from});
