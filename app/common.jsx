@@ -2,7 +2,8 @@ export const tabs = [
   {key: 'identity', label: 'Identity', icon: 'user'},
   {key: 'records', label: 'Records', icon: 'file text outline'},
   {key: 'requests', label: 'Requests', icon: 'hourglass outline'},
-  {key: 'resume', label: 'Résumé', icon: 'signup'},
+  {key: 'resume', label: 'CVs', icon: 'signup'}
+  
 ];
 
 export const recordTypes = [

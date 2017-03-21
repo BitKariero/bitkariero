@@ -4,6 +4,7 @@ import BK_Menu from './components/menu.jsx';
 import BK_Identity from './components/identity.jsx';
 import BK_Records from './components/records.jsx';
 import BK_Requests from './components/requests.jsx';
+import BK_Resume from './components/resume.jsx';
 import { placeholderId } from './common.jsx';
 
 
@@ -64,6 +65,9 @@ class BitKariero extends React.Component {
         }
         { this.state.activeTab == 'requests' &&
           <BK_Requests requests={this.state.requests}/>
+        }
+        { this.state.activeTab == 'resume' &&
+          <BK_Resume/>
         }
       </div>
     );

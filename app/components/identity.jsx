@@ -164,7 +164,7 @@ class BK_IdentityFullNew extends BK_IdentityFull {
 
     return (
       <div>
-        <Form id='create-id' onsubmit='return false;'>
+        <Form id='create-id'>
         <Header as='h2' attached='top'>
           <Grid columns={2}>
             <Grid.Column width={2} verticalAlign='middle'>

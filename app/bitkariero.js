@@ -7,10 +7,14 @@ var BK = new function() {
   this.identityContract = null;
 
   //list of membership SCs
-  this.myMemberships = []
+  this.myMemberships = [];
 
   //list of reference SCs
-  this.myReferences = []
+  this.myReferences = [];
+  
+  //list of all CVs
+  //{identity: '0x...', name: 'Bob', text: 'amazing', references: [ {from: 'Alice', content: 'amazing ref'} ] }
+  this.allCVs = [];
 
   //identities stores the following
   // {owner: '0xXXX', identity: '0xXXX'}
@@ -236,6 +240,33 @@ var BK = new function() {
       })
     });
   };
+  
+  //fill CV list
+  //parse identities list and get names and CV
+  //if CV exists get info
+  //if references exist in CV get reference info
+  this.populateCVs = function() {
+      this.identities.map((x) => {
+          var identity = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address:x.identity});
+          var info = await identity.info();
+          var CVhash = await identity.CV();
+          var text = "no cv";
+          var references = [];
+          if(CVhash.length > 0) {
+              var CVstr = await this.ipfs.get(CVhash);
+              var CV = JSON.parse(CVstr);
+              text = CV.text;
+              references = CV.references.map((x) => {
+                    var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: x});
+                    var hash = await refSC.reference();
+                    var content = await this.ipfs.get(hash);
+                    var fromSCaddr = await refSC.from();
+                    return {from: fromSCaddr, content: content};
+              });
+          }
+          this.allCVs.push({identity: x.identity, name: info, text: text, references: references});
+      });
+  }
   
   //create CV
   //pass a list of reference SCs as references
