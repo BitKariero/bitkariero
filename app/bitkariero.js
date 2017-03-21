@@ -232,7 +232,9 @@ var BK = new function() {
       console.log("Creating identity: " + info);
 
       return BK.ipfs.put(info).then(info => {
-        BK.bkIdentity.deploy([info]).then((sc) => {
+        console.log('identity -> ipfs ->', info);
+        BK.bkIdentity.deploy([info], {gas: 5000000}).then((sc) => {
+          console.log('identity -> deployed ->', sc.address);
           BK.mainContract.addIdentity(sc.address);
           BK.identityContract = sc;
           BK.crypto.exportKey('own').then(BK.ipfs.put).then(sc.updatePubKey);
@@ -246,7 +248,7 @@ var BK = new function() {
   //if CV exists get info
   //if references exist in CV get reference info
   this.populateCVs = function() {
-      this.identities.map((x) => {
+      this.identities.map(async (x) => {
           var identity = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address:x.identity});
           var info = await identity.info();
           var CVhash = await identity.CV();
@@ -256,7 +258,7 @@ var BK = new function() {
               var CVstr = await this.ipfs.get(CVhash);
               var CV = JSON.parse(CVstr);
               text = CV.text;
-              references = CV.references.map((x) => {
+              references = CV.references.map(async (x) => {
                     var refSC = new EmbarkJS.Contract({abi: BK.bkReference.abi, address: x});
                     var hash = await refSC.reference();
                     var content = await this.ipfs.get(hash);
