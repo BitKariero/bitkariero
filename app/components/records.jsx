@@ -11,10 +11,10 @@ export default class BK_Records extends React.Component {
   }
   
   toggleCheckbox(event) {
-    if(this.selectedReferences.has(target.name)) {
-        this.selectedReferences.delete(target.name);
+    if(this.selectedReferences.has(event.target.name)) {
+        this.selectedReferences.delete(event.target.name);
     } else {
-        this.selectedReferences.add(target.name);
+        this.selectedReferences.add(target.target.name);
     }
   }
   
@@ -29,7 +29,9 @@ export default class BK_Records extends React.Component {
     const { records } = this.props;
     console.log(records);
 
+     var parent = this;
     return (
+       
       <div>
       <Header as='h2' icon textAlign='center'>
      <Icon name='check circle' circular />
@@ -37,12 +39,13 @@ export default class BK_Records extends React.Component {
        Verified Requests
      </Header.Content>
      </Header>
-        { records.map(function(record, i) {
+        { 
+        records.map(function(record, i) {
             return (
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Checkbox name={record.sc} label='add to cv' onChange={this.toggleCheckbox}/>
+                    <Checkbox name={record.sc} label='add to cv' onChange={parent.toggleCheckbox}/>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
@@ -94,7 +97,7 @@ export default class BK_Records extends React.Component {
               </div>
             );
           })}
-          <Button label='Create CV' onclick={this.createCV} />
+          <Button label='Create CV' onclick={parent.createCV} />
       </div>
       
       
