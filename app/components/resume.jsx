@@ -21,7 +21,8 @@ export default class BK_Resume extends React.Component {
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Image src={'img/' + i + '.png'} shape='circular' size='small'/>
+                    <div className="address-icon" style={{backgroundImage: 'url(' + blockies.create({ seed:CV.identity ,size: 8,scale: 16}).toDataURL()+')'}}>
+                      </div>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
@@ -31,21 +32,6 @@ export default class BK_Resume extends React.Component {
                             <p>
                                 {CV.text || 'CV'}
                             </p>
-                          </Grid.Column>
-                          <Grid.Column floated='right' width={3}>
-                            <Container textAlign='left'>
-                              <Label as='a'>
-                                   <Icon name='calendar' />Date
-                             </Label>
-                             {"     " +  'Date'}
-                           </Container>
-                           <br/>
-                           <Container textAlign='left'>
-                             <Label as='a'>
-                                  <Icon name='clock' />Time
-                            </Label>
-                            {"     " +  'Time'}
-                           </Container>
                           </Grid.Column>
                         </Grid.Row>
                         

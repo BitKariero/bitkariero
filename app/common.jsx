@@ -2,7 +2,7 @@ export const tabs = [
   {key: 'identity', label: 'Identity', icon: 'user'},
   {key: 'records', label: 'Records', icon: 'file text outline'},
   {key: 'requests', label: 'Requests', icon: 'hourglass outline'},
-  {key: 'resume', label: 'CVs', icon: 'signup'}
+  {key: 'resume', label: 'People', icon: 'user'}
   
 ];
 
