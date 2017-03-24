@@ -97,7 +97,7 @@ export default class BK_Records extends React.Component {
               </div>
             );
           })}
-          <Button label='Create CV' onclick={parent.createCV} />
+          <Button label='Create CV' onClick={parent.createCV} />
       </div>
 
 
