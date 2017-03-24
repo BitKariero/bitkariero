@@ -13,14 +13,18 @@ export default class BK_RequestForm extends React.Component {
     if(!BK.ownAddress) {
       BK.init();
     }
-    this.state = {addrValue: BK.ownAddress};
+    this.state = {addrValue: ''};
+    this.dpOptions = BK.addressNames.map((x) => { return {text: x.name, value: x.value}});
+    
+   
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChange(event) {
-    this.setState({addrValue: event.target.value});
+  handleChange(e, result) {
+    console.log(result);
+    this.setState({addrValue: result.value});
   }
 
   handleSubmit(event) {
@@ -39,15 +43,8 @@ export default class BK_RequestForm extends React.Component {
           <Dropdown name="recordType" placeholder='Record type' fluid selection options={recordTypes} />
         </Form.Field>
         <Form.Field>
-          <label icon='asterisk'>Provided by:</label>
-          <Input
-          name="addr"
-          type="text"
-          value={this.state.addrValue}
-          onChange={this.handleChange}
-          label={{ icon: 'asterisk' }}
-          labelPosition='right corner'
-          />
+          <label>From: </label>
+          <Dropdown name="provider" fluid selection options={this.dpOptions} onChange={this.handleChange} />
         </Form.Field>
         <Button primary type='submit'>Submit</Button>
       </Form>

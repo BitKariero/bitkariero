@@ -1,27 +1,45 @@
 import React from 'react';
 import {render} from 'react-dom';
-import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Checkbox } from 'semantic-ui-react';
+import { Modal, Form, Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Checkbox } from 'semantic-ui-react';
 
 export default class BK_Records extends React.Component {
   constructor(props) {
     super(props);
+    
+    this.state = {cvtext: '', isOpen:false};
+    
     this.selectedReferences = new Set();
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
-    this.createCV = this.createCV.bind(this);
+    
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
-  toggleCheckbox(event) {
-    if(this.selectedReferences.has(event.target.name)) {
-        this.selectedReferences.delete(event.target.name);
+  handleChange(event) {
+    this.setState({cvtext: event.target.value});
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    BK.createCV(Array.from(this.selectedReferences), this.state.cvtext);
+    this.setState({isOpen: true});
+  }
+  
+  closeModal() {
+    this.setState({cvtext: '', isOpen: false});
+  }
+  
+  toggleCheckbox(sc) {
+    console.log(sc);
+    if(this.selectedReferences.has(sc)) {
+        this.selectedReferences.delete(sc);
     } else {
-        this.selectedReferences.add(target.target.name);
+        this.selectedReferences.add(sc);
     }
   }
 
-  createCV() {
-    console.log(this.selectedReferences);
-    BK.createCV(Array.from(this.selectedReferences), 'SUPER AMAZING CV');
-  }
 
   render() {
     const { records } = this.props;
@@ -43,52 +61,58 @@ export default class BK_Records extends React.Component {
         recs.map(function(record, i) {
             return (
               <div>
-              <Grid celled container stackable reversed='mobile' columns={4}>
-                  <Grid.Column width={2}>
-                    <Checkbox name={record.sc} label='add to cv' onChange={parent.toggleCheckbox}/>
+              <Grid celled container stackable columns={2}>
+                  <Grid.Column verticalAlign='middle' centered width={2}>
+                    <Grid.Row>
+                      <div className="address-icon" style={{backgroundImage: 'url(' + blockies.create({ seed:record.sc ,size: 8,scale: 16}).toDataURL()+')'}}>
+                      </div>
+                      <Checkbox label='add to cv' onChange={(e) => parent.toggleCheckbox(record.sc)}/>
+                    </Grid.Row>
                   </Grid.Column>
-                  <Grid.Column width={13}>
+                  <Grid.Column width={14}>
                       <Grid>
                         <Grid.Row>
-                          <Grid.Column floated='left' width={10}>
-                            <Header as='h1'>{record.company || 'Company'}</Header>
-                            <Header as='h2'><i>{record.role || 'Role'}</i></Header>
-                            <Header as='h3'><i>{record.location || 'Location'}</i></Header>
-                          </Grid.Column>
-                          <Grid.Column floated='right' width={3}>
-                            <Container textAlign='left'>
-                              <Label as='a'>
-                                   <Icon name='calendar' />Date
-                             </Label>
-                             {"     " + record.date || 'Date'}
-                           </Container>
-                           <br/>
-                           <Container textAlign='left'>
-                             <Label as='a'>
-                                  <Icon name='clock' />Time
-                            </Label>
-                            {"     " + record.time || 'Time'}
-                           </Container>
-                          </Grid.Column>
-                        </Grid.Row>
+                          <Grid.Column floated='left'>
+                            <Header as='h2'>{'Reference: ' + record.type.toLowerCase()}</Header>
 
-                        <Grid.Row>
-                          <Grid.Column floated='left' width={16}>
-                            <Container textAlign='justified'>
-                              <b>{record.recordType}</b>
-                              <Divider />
-                              <Accordion>
-                                <Accordion.Title>
-                                  <Icon name='dropdown' />
-                                  See full {record.recordType || 'Record'}
-                                </Accordion.Title>
-                                <Accordion.Content>
-                                  <p>
-                                    {record.content || 'Content'}
-                                  </p>
-                                </Accordion.Content>
-                                </Accordion>
-                            </Container>
+                            <Grid.Row>
+                              <Grid.Column width={2}>
+                                <Label as='a'>
+                                     <Icon name='user' />From
+                               </Label>
+                             </Grid.Column>
+
+                             <Grid.Column width={14}>
+                              <span>{record.fromid.name} ({record.from})</span>
+                             </Grid.Column>
+                           </Grid.Row>
+                            
+                            <Grid.Row>
+                              <Grid.Column width={2}>
+                                <Label as='a'>
+                                     <Icon name='certificate' />Address
+                               </Label>
+                             </Grid.Column>
+
+                             <Grid.Column width={14}>
+                              <span>{record.sc}</span>
+                             </Grid.Column>
+                           </Grid.Row>
+                           
+                           
+
+
+                            <Grid.Row>
+                            <Grid.Column width={2}>
+                              <Label as='a'>
+                                   <Icon name='angle double down' />Contents
+                             </Label>
+                           </Grid.Column>
+
+                           <Grid.Column width={14}>
+                            <span>{record.content}</span>
+                           </Grid.Column>
+                           </Grid.Row>
                           </Grid.Column>
                         </Grid.Row>
                       </Grid>
@@ -96,12 +120,6 @@ export default class BK_Records extends React.Component {
               </Grid>
               </div>
             );
-          })}
-          <Button label='Create CV' onClick={parent.createCV} />
-      </div>
-
-
-    );
   }
 
 }
