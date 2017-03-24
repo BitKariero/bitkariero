@@ -56,6 +56,8 @@ class BitKariero extends React.Component {
         if (parsed && typeof parsed != 'string') {
           record = parsed
         } else { record.content = ref; }
+        
+        record.sc = BK.myReferences[i].sc;
 
         records.push(record);
       }
