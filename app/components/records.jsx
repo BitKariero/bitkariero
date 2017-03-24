@@ -1,28 +1,44 @@
 import React from 'react';
 import {render} from 'react-dom';
-import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Checkbox } from 'semantic-ui-react';
+import { Modal, Form, Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Checkbox } from 'semantic-ui-react';
 
 export default class BK_Records extends React.Component {
   constructor(props) {
     super(props);
+    
+    this.state = {cvtext: '', isOpen:false};
+    
     this.selectedReferences = new Set();
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
-    this.createCV = this.createCV.bind(this);
+    
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({cvtext: event.target.value});
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    BK.createCV(Array.from(this.selectedReferences), this.state.cvtext);
+    this.setState({isOpen: true});
   }
   
-  toggleCheckbox(event) {
-    if(this.selectedReferences.has(event.target.name)) {
-        this.selectedReferences.delete(event.target.name);
+  closeModal() {
+    this.setState({cvtext: '', isOpen: false});
+  }
+  
+  toggleCheckbox(sc) {
+    console.log(sc);
+    if(this.selectedReferences.has(sc)) {
+        this.selectedReferences.delete(sc);
     } else {
-        this.selectedReferences.add(target.target.name);
+        this.selectedReferences.add(sc);
     }
   }
-  
-  createCV() {
-    console.log(this.selectedReferences);
-    BK.createCV(Array.from(this.selectedReferences), 'SUPER AMAZING CV');
-  }
-  
   
 
   render() {
@@ -45,7 +61,7 @@ export default class BK_Records extends React.Component {
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
                   <Grid.Column width={2}>
-                    <Checkbox name={record.sc} label='add to cv' onChange={parent.toggleCheckbox}/>
+                    <Checkbox label='add to cv' onChange={(e) => parent.toggleCheckbox(record.sc)}/>
                   </Grid.Column>
                   <Grid.Column width={13}>
                       <Grid>
@@ -96,12 +112,42 @@ export default class BK_Records extends React.Component {
               </Grid>
               </div>
             );
-          })}
-          <Button label='Create CV' onclick={parent.createCV} />
-      </div>
+          })
+          }
+      <Grid celled container stackable reversed='mobile' columns={4}>
+        <Grid.Column width={15}>
+          <Form onSubmit={this.handleSubmit}>
+            <Form.Field>
+            <label>
+              CV Text:
+              <input type="text" value={this.state.cvtext} onChange={this.handleChange} />
+            </label>
+            </Form.Field>
+            <Button primary type="submit">Create CV</Button>
+          </Form>
+          
+
+        </Grid.Column>
+    </Grid>
+    
+    <Modal open={this.state.isOpen} onClose={this.closeModal}>
+        <Modal.Header>
+          CV Created
+        </Modal.Header>
+        <Modal.Content>
+          Created CV Sucessfully. Preview:
+          <div>
+            {this.state.cvtext}
+          </div>
+        </Modal.Content>
+      </Modal>
+      
+    </div>
       
       
-    );    
+    ); 
+        
+    
   }
   
 }

@@ -265,6 +265,7 @@ var BK = new function() {
           console.log('populateCVs -> infohash ->', infoHash);
           var info = await this.ipfs.get(infoHash);
           info = JSON.parse(info);
+          console.log('populateCVs -> info ->', info);
           var CVhash = await identity.CV();
           console.log('populateCVs -> cvhash ->', CVhash);
           var text = "no cv";
@@ -302,7 +303,7 @@ var BK = new function() {
       var CV = {owner: BK.ownAddress, references: references, text: CVtext};
       return this.ipfs.put(JSON.stringify(CV)).then((hash)=>{
           console.log("IPFS hash:" + hash);
-          return this.identityContract.updateCV(hash);
+          return this.identityContract.updateCV(hash).then((tx) => console.log("TX", tx));
       });
   };
 
