@@ -9,7 +9,7 @@ export default class BK_Records extends React.Component {
     this.toggleCheckbox = this.toggleCheckbox.bind(this);
     this.createCV = this.createCV.bind(this);
   }
-  
+
   toggleCheckbox(event) {
     if(this.selectedReferences.has(event.target.name)) {
         this.selectedReferences.delete(event.target.name);
@@ -17,21 +17,21 @@ export default class BK_Records extends React.Component {
         this.selectedReferences.add(target.target.name);
     }
   }
-  
+
   createCV() {
     console.log(this.selectedReferences);
     BK.createCV(Array.from(this.selectedReferences), 'SUPER AMAZING CV');
   }
-  
-  
 
   render() {
     const { records } = this.props;
-    console.log(records);
+    var parent = this;
 
-     var parent = this;
+    // Diplay latest first
+    let recs = [].concat(records).reverse();
+
     return (
-       
+
       <div>
       <Header as='h2' icon textAlign='center'>
      <Icon name='check circle' circular />
@@ -39,8 +39,8 @@ export default class BK_Records extends React.Component {
        Verified Requests
      </Header.Content>
      </Header>
-        { 
-        records.map(function(record, i) {
+        {
+        recs.map(function(record, i) {
             return (
               <div>
               <Grid celled container stackable reversed='mobile' columns={4}>
@@ -99,9 +99,9 @@ export default class BK_Records extends React.Component {
           })}
           <Button label='Create CV' onclick={parent.createCV} />
       </div>
-      
-      
-    );    
+
+
+    );
   }
-  
+
 }
