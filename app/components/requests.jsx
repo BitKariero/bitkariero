@@ -1,15 +1,27 @@
 import React from 'react';
 import {render} from 'react-dom';
-import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label } from 'semantic-ui-react';
+import { Accordion, Grid, Segment, Container, Divider, Icon, Image, Header, Label, Button, Modal } from 'semantic-ui-react';
+import BK_RequestFulfillForm from './request-fulfill-form.jsx';
+
 
 export default class BK_Requests extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {isOpen: false};
+
+    this.toggleModal = this.toggleModal.bind(this);
+  }
+
+  toggleModal(addr) {
+    this.setState({isOpen: !this.state.isOpen});
   }
 
   render() {
     const { requests } = this.props;
-    console.log(requests);
+    var parent = this;
+
+    // Diplay latest first
+    let reqs = [].concat(requests).reverse();
 
     return (
       <div>
@@ -19,7 +31,7 @@ export default class BK_Requests extends React.Component {
         Incoming Requests
      </Header.Content>
      </Header>
-        { requests.map(function(object, i) {
+        { reqs.map(function(object, i) {
             return (
               <div>
               <Grid celled container stackable columns={2}>
@@ -29,7 +41,7 @@ export default class BK_Requests extends React.Component {
                       </div>
                     </Grid.Row>
                   </Grid.Column>
-                  <Grid.Column width={14}>
+                  <Grid.Column width={10}>
                       <Grid>
                         <Grid.Row>
                           <Grid.Column floated='left'>
@@ -65,11 +77,31 @@ export default class BK_Requests extends React.Component {
                         </Grid.Row>
                       </Grid>
                   </Grid.Column>
+
+                  <Grid.Column verticalAlign='middle' centered width={4}>
+                    <Button
+                      positive
+                      content='Fulfill request'
+                      icon='exchange'
+                      labelPosition='left'
+                      id={'bk-fulfill-req-' + object.sc}
+                      onClick={(e) => {parent.setState({contract: object}); parent.toggleModal(object.sc)}}
+                    />
+                  </Grid.Column>
               </Grid>
             </div>
             );
           })}
-      </div>
+
+      <Modal open={parent.state.isOpen} onClose={parent.toggleModal}>
+        <Modal.Header>
+          Fulfill request
+        </Modal.Header>
+        <Modal.Content>
+          <BK_RequestFulfillForm onChange={parent.toggleModal} object={parent.state.contract}/>
+        </Modal.Content>
+      </Modal>
+    </div>
     );
   }
 }

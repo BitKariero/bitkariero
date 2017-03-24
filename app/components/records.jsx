@@ -39,15 +39,17 @@ export default class BK_Records extends React.Component {
         this.selectedReferences.add(sc);
     }
   }
-  
+
 
   render() {
     const { records } = this.props;
-    console.log(records);
+    var parent = this;
 
-     var parent = this;
+    // Diplay latest first
+    let recs = [].concat(records).reverse();
+
     return (
-       
+
       <div>
       <Header as='h2' icon textAlign='center'>
      <Icon name='check circle' circular />
@@ -55,8 +57,8 @@ export default class BK_Records extends React.Component {
        Verified Requests
      </Header.Content>
      </Header>
-        { 
-        records.map(function(record, i) {
+        {
+        recs.map(function(record, i) {
             return (
               <div>
               <Grid celled container stackable columns={2}>
@@ -118,42 +120,6 @@ export default class BK_Records extends React.Component {
               </Grid>
               </div>
             );
-          })
-          }
-      <Grid celled container stackable reversed='mobile' columns={4}>
-        <Grid.Column width={16}>
-          <Form onSubmit={this.handleSubmit}>
-            <Form.Field>
-            <label>
-              CV Text:
-              <input type="text" value={this.state.cvtext} onChange={this.handleChange} />
-            </label>
-            </Form.Field>
-            <Button primary type="submit">Create CV</Button>
-          </Form>
-          
-
-        </Grid.Column>
-    </Grid>
-    
-    <Modal open={this.state.isOpen} onClose={this.closeModal}>
-        <Modal.Header>
-          CV Created
-        </Modal.Header>
-        <Modal.Content>
-          Created CV Sucessfully. Preview:
-          <div>
-            {this.state.cvtext}
-          </div>
-        </Modal.Content>
-      </Modal>
-      
-    </div>
-      
-      
-    ); 
-        
-    
   }
-  
+
 }
