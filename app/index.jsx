@@ -43,10 +43,9 @@ class BitKariero extends React.Component {
     this.setState({records: records});
 
     for (var i = 0, len = BK.myReferences.length; i < len; i++) {
-      try {
       var ref = await BK.getReference(BK.myReferences[i].sc);
       console.log("updateReference – read ref: " + ref);
-      if (ref && ref.length > 0) {
+      if (ref) {
         var record = {};
         var parsed = null;
 
@@ -59,17 +58,11 @@ class BitKariero extends React.Component {
         } else { record.content = ref; }
         
         record.sc = BK.myReferences[i].sc;
-        record.from = BK.myReferences[i].from;
-        record.type = 'Reference';
-        record.fromid = await BK.getIdentityInfo(BK.getIdentity(record.from));
 
         records.push(record);
-        this.setState({records: records});
-      }    
-    
-        } catch(e) {console.log(e);}
+      }
     }
-    
+    this.setState({records: records});
   }
 
   async updateRequests() {
@@ -77,22 +70,12 @@ class BitKariero extends React.Component {
     this.setState({requests: requests});
 
     for (var i = 0, len = BK.incomingRequests.length; i < len; i++) {
-      try {
       var request = BK.incomingRequests[i];
       request['type'] = 'Reference';
-      var from = request.from;
-      request.fromid = await BK.getIdentityInfo(BK.getIdentity(from));
       requests.push(request);
-      console.log(request);
-      this.setState({requests: requests});
-      } catch(err) {console.log(err)}
     }
 
-    
-  }
-  
-  async updateIdentityList() {
-    BK.updateIdentityList();
+    this.setState({requests: requests});
   }
 
   async updateState() {
@@ -100,7 +83,6 @@ class BitKariero extends React.Component {
     await this.updateIdentity();
     await this.updateReferences();
     await this.updateRequests();
-    await this.updateIdentityList();
     console.log("Records ->");
     console.log(this.state.records);
   }
