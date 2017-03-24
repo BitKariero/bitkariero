@@ -81,7 +81,6 @@ class BitKariero extends React.Component {
       var request = BK.incomingRequests[i];
       request['type'] = 'Reference';
       var from = request.from;
-      consoel.log(from);
       request.fromid = await BK.getIdentityInfo(BK.getIdentity(from));
       requests.push(request);
       console.log(request);
