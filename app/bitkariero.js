@@ -9,6 +9,9 @@ var BK = new function() {
 
   //list of membership SCs
   this.myMemberships = [];
+  
+  //account - address mapping
+  this.addressNames = [];
 
   //list of reference SCs (records)
   this.myReferences = [];
@@ -204,12 +207,21 @@ var BK = new function() {
         
         //load CVstr
         BK.populateCVs();
+        
       });
     }).then( () => {
       BK.crypto.init();
     });
   };
 
+  this.updateIdentityList = async function() {
+      this.addressNames = await Promise.all(BK.identities.map(async (x) => {
+        console.log(x);
+        var info = await BK.getIdentityInfo(x.identity);
+        return {name:info.name, value:x.owner}
+       }));
+  }
+  
   this.requestReference = function(from) {
       return this.requestRecord(this.bkReference, from, BK.mainContract.addReferenceRequest);
   };
@@ -281,7 +293,6 @@ var BK = new function() {
                     var fromSCaddr = await refSC.provider();
                     var fromID = await this.getIdentity(fromSCaddr);
                     var xInfo = await this.getIdentityInfo(fromID);
-                    xInfo = JSON.parse(xInfo);
                     return {from: xInfo, content: content};
               }));
           }
@@ -293,7 +304,7 @@ var BK = new function() {
     var identity = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address:_identity});
     var infoHash = await identity.info();
     var info = await this.ipfs.get(infoHash);
-    return info;
+    return JSON.parse(info);
   };      
   
   //create CV

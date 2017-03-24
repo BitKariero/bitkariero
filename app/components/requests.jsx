@@ -38,6 +38,18 @@ export default class BK_Requests extends React.Component {
                             <Grid.Row>
                               <Grid.Column width={2}>
                                 <Label as='a'>
+                                     <Icon name='user' />From
+                               </Label>
+                             </Grid.Column>
+
+                             <Grid.Column width={14}>
+                              <span>{object.fromid.name} ({object.from}) </span>
+                             </Grid.Column>
+                           </Grid.Row>
+                           
+                            <Grid.Row>
+                              <Grid.Column width={2}>
+                                <Label as='a'>
                                      <Icon name='certificate' />Address
                                </Label>
                              </Grid.Column>
@@ -48,17 +60,7 @@ export default class BK_Requests extends React.Component {
                            </Grid.Row>
 
 
-                            <Grid.Row>
-                            <Grid.Column width={2}>
-                              <Label as='a'>
-                                   <Icon name='angle double down' />From
-                             </Label>
-                           </Grid.Column>
-
-                           <Grid.Column width={14}>
-                            <span>{object.from}</span>
-                           </Grid.Column>
-                           </Grid.Row>
+                           
                           </Grid.Column>
                         </Grid.Row>
                       </Grid>
