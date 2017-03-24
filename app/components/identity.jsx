@@ -154,7 +154,7 @@ class BK_IdentityFullNew extends BK_IdentityFull {
 
    var form = document.querySelector('#create-id');
    var obj = serialize(form, { hash: true });
-   
+
    BK.createId(obj);
   }
 
@@ -209,7 +209,7 @@ class BK_IdentityFullNew extends BK_IdentityFull {
                         <div className='bk-identity-field'>
                         <TextArea name={idField}
                           className='bk-identity-field'
-                          value={identity[idField]}
+                          defaultValue={identity[idField]}
                         />
                         </div>
                                                          :

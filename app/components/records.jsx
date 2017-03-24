@@ -40,14 +40,15 @@ export default class BK_Records extends React.Component {
     }
   }
   
-
   render() {
     const { records } = this.props;
-    console.log(records);
+    var parent = this;
 
-     var parent = this;
+    // Diplay latest first
+    let recs = [].concat(records).reverse();
+
     return (
-       
+
       <div>
       <Header as='h2' icon textAlign='center'>
      <Icon name='check circle' circular />
@@ -55,8 +56,8 @@ export default class BK_Records extends React.Component {
        Verified Requests
      </Header.Content>
      </Header>
-        { 
-        records.map(function(record, i) {
+        {
+        recs.map(function(record, i) {
             return (
               <div>
               <Grid celled container stackable columns={2}>
@@ -118,8 +119,9 @@ export default class BK_Records extends React.Component {
               </Grid>
               </div>
             );
+
           })
-          }
+        }
       <Grid celled container stackable reversed='mobile' columns={4}>
         <Grid.Column width={16}>
           <Form onSubmit={this.handleSubmit}>
@@ -153,7 +155,6 @@ export default class BK_Records extends React.Component {
       
     ); 
         
-    
-  }
-  
+   }
+
 }
