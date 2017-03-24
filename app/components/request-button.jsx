@@ -17,7 +17,7 @@ export default class BK_RequestButton extends React.Component {
 
   render() {
     return (
-      <Modal open={this.state.isOpen} trigger={
+      <Modal open={this.state.isOpen} onClose={this.toggleModal} trigger={
         <Button
           primary
           content='New request'
