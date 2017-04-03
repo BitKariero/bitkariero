@@ -25,11 +25,15 @@ contract bkIdentity {
         owner = msg.sender;
         info = _info;
     }
-    
+
+    function setOwner(address _owner) onlyOwner() {
+        owner = _owner;
+    }
+
     function updateCV(string _CV) onlyOwner() {
         CV = _CV;
     }
-    
+
     function updatePubKey(string _pubKey) onlyOwner() {
         pubKey = _pubKey;
     }
@@ -86,6 +90,14 @@ contract bkContract {
         owner = msg.sender;
         provider = _provider;
     }
+
+    function setOwner(address _owner) onlyOwner() {
+        owner = _owner;
+    }
+
+    function setProvider(address _provider) onlyOwner() {
+        provider = _provider;
+    }
 }
 
 contract bkFloating {
@@ -116,7 +128,7 @@ contract bkFloating {
 }
 
 contract bkRevocable{
-    bool isRevoked = false;
+    bool public isRevoked = false;
 
     function revoke() public {
         isRevoked = true;
@@ -150,7 +162,7 @@ contract bkMembership is bkContract, bkRevocable {
 
     function bkMembership(address _y) bkContract(_y) {}
 
-    function revoke() onlyProvider(){
+    function revoke() onlyProvider {
         super.revoke();
     }
 
