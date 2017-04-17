@@ -29,7 +29,6 @@ tar -xvf geth-linux-amd64-1.6.0-facc47cb.tar.gz
 mv ./geth-linux-amd64-1.6.0-facc47cb/geth ~/bin/
 
 #solc
-npm install -g solc
 wget https://github.com/ethereum/solidity/releases/download/v0.4.10/solc
 chmod 777 ./solc
 mv ./solc ~/bin/
