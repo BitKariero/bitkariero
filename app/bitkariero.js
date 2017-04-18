@@ -437,7 +437,7 @@ var BK = new function() {
     var addRefEvent = this.w3mainContact.evAddReferenceRequest(filter, {fromBlock: BK.startingBlock, toBlock: 'latest'});
     addRefEvent.watch((error, log) => {
         this.logScan(error, log);
-        store.push({sc: log.args.request, from: log.args.from});
+        store.push({sc: log.args.request, from: log.args.from, to: log.args.to});
     });
 
     // var addMemEvent = this.w3mainContact.evAddMembershipRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
