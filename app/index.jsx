@@ -59,7 +59,7 @@ class BitKariero extends React.Component {
         } else { record.content = ref; }
         
         record.sc = BK.myReferences[i].sc;
-        record.from = BK.myReferences[i].from;
+        record.from = BK.myReferences[i].to;
         record.type = 'Reference';
         record.fromid = await BK.getIdentityInfo(BK.getIdentity(record.from));
 
