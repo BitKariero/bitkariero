@@ -1,5 +1,5 @@
 {
-  "contracts": ["app/contracts/**"],
+  "contracts": [],
   "app": {
     "css/bk.css": ["app/public/css/**"],
     "bundle.js": ["embark.js", "dist/bundle.js"],
