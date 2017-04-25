@@ -6,6 +6,7 @@ var BK = new function() {
 
   this.ownAddress = null;
   this.identityContract = null;
+  this.eventCallback = null;
 
   //list of membership SCs
   this.myMemberships = [];
@@ -171,8 +172,11 @@ var BK = new function() {
   };
 
   /* Initialize */
-  this.init = function(addr) {
+  this.init = function(eventCallback, addr) {
     return new Promise(function (resolve, reject) {
+      BK.eventCallback = new function() {};
+      if(eventCallback)
+        BK.eventCallback = eventCallback;
       BK.ownAddress = addr ? addr : web3.eth.accounts[0];
       BK.identityContract = null;
       BK.requests = [];
@@ -216,7 +220,7 @@ var BK = new function() {
 
   this.updateIdentityList = async function() {
       this.addressNames = await Promise.all(BK.identities.map(async (x) => {
-        console.log(x);
+        //console.log(x);
         var info = await BK.getIdentityInfo(x.identity);
         return {name:info.name, value:x.owner}
        }));
@@ -415,7 +419,7 @@ var BK = new function() {
                 decoded = await BK.ipfs.b64StringToBlob(data);
               } catch(err) {;}
 
-              console.log(decoded);
+              //console.log(decoded);
               if (decoded && decoded != "" && decoded.size >= BK_ENCRYPTED_MIN_SIZE) {
                 decoded = await BK.crypto.decrypt(decoded);
               } else {
@@ -438,6 +442,7 @@ var BK = new function() {
     addRefEvent.watch((error, log) => {
         this.logScan(error, log);
         store.push({sc: log.args.request, from: log.args.from, to: log.args.to});
+        BK.eventCallback();
     });
 
     // var addMemEvent = this.w3mainContact.evAddMembershipRequest({from: this.ownAddress}, {fromBlock: BK.startingBlock, toBlock: 'latest'});
@@ -482,6 +487,9 @@ var BK = new function() {
           if(mapping.owner == BK.ownAddress) {
             BK.identityContract = new EmbarkJS.Contract({abi: BK.bkIdentity.abi, address: mapping.identity});
           }
+          
+          BK.eventCallback();
+
       });
   }
 

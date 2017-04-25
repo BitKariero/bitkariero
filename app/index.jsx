@@ -23,7 +23,7 @@ class BitKariero extends React.Component {
   }
 
   async componentWillMount() {
-    await BK.init();
+    await BK.init(this.updateState);
     await this.updateState();
   }
 
@@ -83,7 +83,7 @@ class BitKariero extends React.Component {
       var from = request.from;
       request.fromid = await BK.getIdentityInfo(BK.getIdentity(from));
       requests.push(request);
-      console.log(request);
+      //console.log(request);
       this.setState({requests: requests});
       } catch(err) {console.log(err)}
     }
@@ -101,8 +101,8 @@ class BitKariero extends React.Component {
     await this.updateReferences();
     await this.updateRequests();
     await this.updateIdentityList();
-    console.log("Records ->");
-    console.log(this.state.records);
+   // console.log("Records ->");
+   // console.log(this.state.records);
   }
 
   onTabChange(newTab) {
