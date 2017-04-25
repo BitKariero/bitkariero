@@ -50,7 +50,6 @@ For testing purposes, we have to use Embark Blockchain. The test will not work o
 For running the application, we have to remove contracts from embark.json to allow deployment to a private testnet.
 
 * `gulp build` // Ensure you are in bitkariero/ directory and you have recently npm install freshly before this
-* `ipfs daemon`
 *  Open the embark.json file in bitkariero/ and change `"contracts": [],` to `"contracts": ["app/contracts/**”],`
 * `embark blockchain`
 * `embark test` // Ensure again that you are in the bitkariero/ directory
